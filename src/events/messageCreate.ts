@@ -4,6 +4,7 @@ import { prefix } from "../config";
 import { executeAddSong } from "../functions/addSong";
 import { executeHello } from "../functions/hello";
 import { executePlaySong } from "../functions/playSong";
+import { executeSkipSong } from "../functions/skipSong";
 import { Song } from "../interfaces/song";
 
 export default (
@@ -17,7 +18,7 @@ export default (
     if (message.content.startsWith(prefix + "play")) {
       executePlaySong(message, songQueue, audioPlayer);
     } else if (message.content.startsWith(prefix + "skip")) {
-      console.log("skip command");
+      executeSkipSong(message, songQueue, audioPlayer);
     } else if (message.content.startsWith(prefix + "add")) {
       executeAddSong(message, songQueue);
     } else if (message.content.startsWith(prefix + "stop")) {
