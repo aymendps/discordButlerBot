@@ -1,12 +1,10 @@
-import { EmbedBuilder, Message, TextChannel, ChannelType } from "discord.js";
+import { EmbedBuilder, Message, ChannelType } from "discord.js";
 import {
   joinVoiceChannel,
   VoiceConnection,
-  createAudioPlayer,
   AudioPlayer,
   createAudioResource,
   AudioPlayerStatus,
-  getVoiceConnection,
 } from "@discordjs/voice";
 import { Song } from "../interfaces/song";
 import * as ytdl from "ytdl-core";
@@ -23,6 +21,7 @@ export const playSong = (
   try {
     if (!currentSong) {
       connection.destroy();
+      audioPlayer.removeAllListeners();
       finishReply();
       return;
     }
@@ -61,7 +60,11 @@ export const playSong = (
   }
 };
 
-export const executePlaySong = (message: Message, songQueue: Song[]) => {
+export const executePlaySong = (
+  message: Message,
+  songQueue: Song[],
+  audioPlayer: AudioPlayer
+) => {
   try {
     const voiceChannel = message.member.voice.channel;
 
@@ -118,8 +121,6 @@ export const executePlaySong = (message: Message, songQueue: Song[]) => {
       guildId: voiceChannel.guild.id,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
-
-    const audioPlayer = createAudioPlayer();
 
     const subscription = connection.subscribe(audioPlayer);
 

@@ -6,6 +6,7 @@ import * as Discord from "discord.js";
 import { token } from "./config";
 import establishListeners from "./events";
 import { Song } from "./interfaces/song";
+import { createAudioPlayer } from "@discordjs/voice";
 
 const client = new Discord.Client({
   intents: [
@@ -20,10 +21,12 @@ const client = new Discord.Client({
 
 const songQueue: Song[] = [];
 
+const audioPlayer = createAudioPlayer();
+
 const main = async () => {
   try {
     console.log("Establishing Butler Bot's listeners...");
-    establishListeners(client, songQueue);
+    establishListeners(client, songQueue, audioPlayer);
     console.log("Butler Bot is starting...");
     await client.login(token);
   } catch (error) {
