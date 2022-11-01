@@ -1,9 +1,11 @@
 import { Client, Interaction, CommandInteraction } from "discord.js";
 import { Commands } from "../commands";
+import { Song } from "../interfaces/song";
 
 const handleSlashCommand = async (
   client: Client,
-  interaction: CommandInteraction
+  interaction: CommandInteraction,
+  songQueue: Song[]
 ) => {
   const slashCommand = Commands.find(
     (command) => command.name === interaction.commandName
@@ -20,13 +22,13 @@ const handleSlashCommand = async (
 
   await interaction.deferReply();
 
-  slashCommand.run(client, interaction);
+  slashCommand.run(client, interaction, songQueue);
 };
 
-export default (client: Client) => {
+export default (client: Client, songQueue: Song[]) => {
   client.on("interactionCreate", async (interaction: Interaction) => {
     if (interaction.isCommand() || interaction.isContextMenuCommand()) {
-      await handleSlashCommand(client, interaction);
+      await handleSlashCommand(client, interaction, songQueue);
     }
   });
 };

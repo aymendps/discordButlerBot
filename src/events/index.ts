@@ -6,7 +6,7 @@ import ready from "./ready";
 
 const establishListeners = (client: Client, songQueue: Song[]) => {
   ready(client);
-  interactionCreate(client);
+  interactionCreate(client, songQueue);
   messageCreate(client, songQueue);
 };
 
