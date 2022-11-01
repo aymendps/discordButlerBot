@@ -3,8 +3,9 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/../.env" });
 
 import * as Discord from "discord.js";
-import ytdl from "ytdl-core";
-import { prefix, token } from "./config";
+import { token } from "./config";
+import establishListeners from "./events";
+import { Song } from "./interfaces/song";
 
 const client = new Discord.Client({
   intents: [
@@ -17,16 +18,17 @@ const client = new Discord.Client({
   ],
 });
 
-const establishConnection = async () => {
+const songQueue: Song[] = [];
+
+const main = async () => {
   try {
+    console.log("Establishing Butler Bot's listeners...");
+    establishListeners(client, songQueue);
     console.log("Butler Bot is starting...");
-
     await client.login(token);
-
-    console.log("Butler Bot has started!");
   } catch (error) {
     console.log(error);
   }
 };
 
-establishConnection();
+main();
