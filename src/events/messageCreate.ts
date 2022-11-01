@@ -2,6 +2,7 @@ import { Client, Message } from "discord.js";
 import { prefix } from "../config";
 import { executeAddSong } from "../functions/addSong";
 import { executeHello } from "../functions/hello";
+import { executePlaySong } from "../functions/playSong";
 import { Song } from "../interfaces/song";
 
 export default (client: Client, songQueue: Song[]) => {
@@ -9,7 +10,7 @@ export default (client: Client, songQueue: Song[]) => {
     if (message.author.bot || !message.content.startsWith(prefix)) return;
 
     if (message.content.startsWith(prefix + "play")) {
-      console.log("play command");
+      executePlaySong(message, songQueue);
     } else if (message.content.startsWith(prefix + "skip")) {
       console.log("skip command");
     } else if (message.content.startsWith(prefix + "add")) {

@@ -8,7 +8,7 @@ export const HelloCommand: Command = {
     await interaction.followUp({
       embeds: [
         new EmbedBuilder()
-          .setDescription("Hello world!")
+          .setDescription("Hello world! Butler Bot is at your service!")
           .setImage(client.user.avatarURL())
           .setColor("DarkGreen"),
       ],
