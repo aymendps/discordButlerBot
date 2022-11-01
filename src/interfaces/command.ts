@@ -1,3 +1,4 @@
+import { AudioPlayer } from "@discordjs/voice";
 import {
   CommandInteraction,
   ChatInputApplicationCommandData,
@@ -9,6 +10,7 @@ export interface Command extends ChatInputApplicationCommandData {
   run: (
     client: Client,
     interaction: CommandInteraction,
-    songQueue?: Song[]
+    songQueue: Song[],
+    audioPlayer: AudioPlayer
   ) => void;
 }

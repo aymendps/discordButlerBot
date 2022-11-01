@@ -11,7 +11,7 @@ const establishListeners = (
   audioPlayer: AudioPlayer
 ) => {
   ready(client);
-  interactionCreate(client, songQueue);
+  interactionCreate(client, songQueue, audioPlayer);
   messageCreate(client, songQueue, audioPlayer);
 };
 

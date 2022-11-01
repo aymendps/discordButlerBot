@@ -8,6 +8,7 @@ import {
 } from "@discordjs/voice";
 import { Song } from "../interfaces/song";
 import * as ytdl from "ytdl-core";
+import { addSong } from "./addSong";
 
 export const playSong = (
   connection: VoiceConnection,
@@ -60,7 +61,7 @@ export const playSong = (
   }
 };
 
-export const executePlaySong = (
+export const executePlaySong = async (
   message: Message,
   songQueue: Song[],
   audioPlayer: AudioPlayer
@@ -126,58 +127,55 @@ export const executePlaySong = (
 
     const args = message.content.split(" ");
 
-    if (!args[1]) {
-      // no additional url was given
-      playSong(
-        connection,
-        audioPlayer,
-        songQueue,
-        songQueue[0],
-        (song, remaining) => {
-          message.channel.send({
-            embeds: [
-              new EmbedBuilder()
-                .setTitle("Playing " + song.title)
-                .setURL(song.url)
-                .setDescription(
-                  "There are " +
-                    remaining +
-                    " other songs remaining in the queue"
-                )
-                .setThumbnail(song.thumbnail_url)
-                .setColor("DarkGreen"),
-            ],
-          });
-        },
-        () => {
-          message.channel.send({
-            embeds: [
-              new EmbedBuilder()
-                .setTitle("Something went wrong")
-                .setDescription(
-                  "Could not play the requested song.. Moving on to the next song in queue"
-                )
-                .setColor("DarkRed"),
-            ],
-          });
-        },
-        () => {
-          message.channel.send({
-            embeds: [
-              new EmbedBuilder()
-                .setTitle("I finished my job")
-                .setDescription(
-                  "There are no songs remaining in the queue. Feel free to request me again with new songs"
-                )
-                .setColor("DarkGreen"),
-            ],
-          });
-        }
-      );
-    } else {
+    if (args[1]) {
       // additional url was given
-      console.log(args[1]);
+      await addSong(args[1], songQueue);
     }
+
+    playSong(
+      connection,
+      audioPlayer,
+      songQueue,
+      songQueue[0],
+      (song, remaining) => {
+        message.channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Playing " + song.title)
+              .setURL(song.url)
+              .setDescription(
+                "There are " + remaining + " other songs remaining in the queue"
+              )
+              .setThumbnail(song.thumbnail_url)
+              .setColor("DarkGreen"),
+          ],
+        });
+      },
+      () => {
+        message.channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Something went wrong")
+              .setDescription(
+                "Could not play the requested song.. Moving on to the next song in queue"
+              )
+              .setColor("DarkRed"),
+          ],
+        });
+      },
+      () => {
+        message.channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("I finished my job")
+              .setDescription(
+                "There are no songs remaining in the queue. Feel free to request me again with new songs"
+              )
+              .setColor("DarkGreen"),
+          ],
+        });
+      }
+    );
   } catch (error) {
     console.log(error);
   }

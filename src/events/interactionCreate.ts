@@ -1,3 +1,4 @@
+import { AudioPlayer } from "@discordjs/voice";
 import { Client, Interaction, CommandInteraction } from "discord.js";
 import { Commands } from "../commands";
 import { Song } from "../interfaces/song";
@@ -5,7 +6,8 @@ import { Song } from "../interfaces/song";
 const handleSlashCommand = async (
   client: Client,
   interaction: CommandInteraction,
-  songQueue: Song[]
+  songQueue: Song[],
+  audioPlayer: AudioPlayer
 ) => {
   const slashCommand = Commands.find(
     (command) => command.name === interaction.commandName
@@ -22,13 +24,17 @@ const handleSlashCommand = async (
 
   await interaction.deferReply();
 
-  slashCommand.run(client, interaction, songQueue);
+  slashCommand.run(client, interaction, songQueue, audioPlayer);
 };
 
-export default (client: Client, songQueue: Song[]) => {
+export default (
+  client: Client,
+  songQueue: Song[],
+  audioPlayer: AudioPlayer
+) => {
   client.on("interactionCreate", async (interaction: Interaction) => {
     if (interaction.isCommand() || interaction.isContextMenuCommand()) {
-      await handleSlashCommand(client, interaction, songQueue);
+      await handleSlashCommand(client, interaction, songQueue, audioPlayer);
     }
   });
 };
