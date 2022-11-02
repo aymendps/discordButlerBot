@@ -93,7 +93,19 @@ export const PlaySongCommand: Command = {
       if (url) {
         if (url.value) {
           // additional url was given
-          await addSong(url.value as string, songQueue);
+          const song = await addSong(url.value as string, songQueue);
+          await interaction.followUp({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle(song.title)
+                .setURL(song.url)
+                .setDescription(
+                  "Added " + song.title + " to the queue: #" + songQueue.length
+                )
+                .setThumbnail(song.thumbnail_url)
+                .setColor("DarkGreen"),
+            ],
+          });
         }
       }
 

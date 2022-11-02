@@ -129,7 +129,19 @@ export const executePlaySong = async (
 
     if (args[1]) {
       // additional url was given
-      await addSong(args[1], songQueue);
+      const song = await addSong(args[1], songQueue);
+      await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle(song.title)
+            .setURL(song.url)
+            .setDescription(
+              "Added " + song.title + " to the queue: #" + songQueue.length
+            )
+            .setThumbnail(song.thumbnail_url)
+            .setColor("DarkGreen"),
+        ],
+      });
     }
 
     playSong(
