@@ -1,5 +1,5 @@
 import { AudioPlayer } from "@discordjs/voice";
-import { Client, Message } from "discord.js";
+import { Client, Message, MessageCreateOptions } from "discord.js";
 import { prefix } from "../config";
 import { executeAddSong } from "../functions/addSong";
 import { executeHello } from "../functions/hello";
@@ -15,18 +15,31 @@ export default (
   client.on("messageCreate", async (message: Message) => {
     if (message.author.bot || !message.content.startsWith(prefix)) return;
 
+    const sendReply = async (options: MessageCreateOptions) => {
+      return await message.channel.send(options);
+    };
+
     if (message.content.startsWith(prefix + "play")) {
-      executePlaySong(message, songQueue, audioPlayer);
+      const args = message.content.substring(5);
+      executePlaySong(
+        client,
+        message.member,
+        args,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
     } else if (message.content.startsWith(prefix + "skip")) {
-      executeSkipSong(message, songQueue, audioPlayer);
+      executeSkipSong(message.member, songQueue, audioPlayer, sendReply);
     } else if (message.content.startsWith(prefix + "add")) {
-      executeAddSong(message, songQueue);
+      const args = message.content.substring(4);
+      executeAddSong(args, songQueue, sendReply);
     } else if (message.content.startsWith(prefix + "stop")) {
       console.log("stop command");
     } else if (message.content.startsWith(prefix + "replay")) {
       console.log("replay command");
     } else if (message.content.startsWith(prefix + "hello")) {
-      executeHello(message);
+      executeHello(client, sendReply);
     }
   });
 };

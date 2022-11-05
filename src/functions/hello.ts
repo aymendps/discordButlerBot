@@ -1,11 +1,22 @@
-import { Message, EmbedBuilder } from "discord.js";
+import {
+  Message,
+  EmbedBuilder,
+  MessageCreateOptions,
+  InteractionReplyOptions,
+  Client,
+} from "discord.js";
 
-export const executeHello = (message: Message) => {
-  message.channel.send({
+export const executeHello = (
+  client: Client,
+  sendReplyFunction: (
+    options: MessageCreateOptions | InteractionReplyOptions
+  ) => Promise<Message>
+) => {
+  sendReplyFunction({
     embeds: [
       new EmbedBuilder()
         .setDescription("Hello world! Butler Bot is at your service!")
-        .setImage(message.client.user.avatarURL())
+        .setImage(client.user.avatarURL())
         .setColor("DarkGreen"),
     ],
   });

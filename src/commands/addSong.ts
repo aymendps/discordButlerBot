@@ -1,10 +1,10 @@
 import {
   CommandInteraction,
   Client,
-  EmbedBuilder,
+  InteractionReplyOptions,
   ApplicationCommandOptionType,
 } from "discord.js";
-import { addSong } from "../functions/addSong";
+import { addSong, executeAddSong } from "../functions/addSong";
 import { Command } from "../interfaces/command";
 import { Song } from "../interfaces/song";
 
@@ -24,44 +24,12 @@ export const AddSongCommand: Command = {
     interaction: CommandInteraction,
     songQueue: Song[]
   ) => {
-    const url = interaction.options.get("url", true);
-    if (!url || !url.value) {
-      interaction.followUp({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription(
-              "Missing song URL. Please try again with a valid URL"
-            )
-            .setColor("DarkRed"),
-        ],
-      });
-      return;
-    }
-
-    const song = await addSong(url.value as string, songQueue);
-
-    if (song) {
-      interaction.followUp({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle(song.title)
-            .setURL(song.url)
-            .setDescription(
-              "Added " + song.title + " to the queue: #" + songQueue.length
-            )
-            .setThumbnail(song.thumbnail_url)
-            .setColor("DarkGreen"),
-        ],
-      });
-    } else {
-      interaction.followUp({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription("The requested song could not be added / found")
-            .setColor("DarkRed"),
-        ],
-      });
-      return;
-    }
+    executeAddSong(
+      interaction.options.get("url", true).value as string,
+      songQueue,
+      async (options: InteractionReplyOptions) => {
+        return await interaction.followUp(options);
+      }
+    );
   },
 };

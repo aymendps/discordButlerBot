@@ -1,5 +1,11 @@
 import { AudioPlayer } from "@discordjs/voice";
-import { EmbedBuilder, Message } from "discord.js";
+import {
+  EmbedBuilder,
+  GuildMember,
+  InteractionReplyOptions,
+  Message,
+  MessageCreateOptions,
+} from "discord.js";
 import { Song } from "../interfaces/song";
 
 export const skipSong = (audioPlayer: AudioPlayer, songQueue: Song[]) => {
@@ -8,18 +14,21 @@ export const skipSong = (audioPlayer: AudioPlayer, songQueue: Song[]) => {
 };
 
 export const executeSkipSong = async (
-  message: Message,
+  member: GuildMember,
   songQueue: Song[],
-  audioPlayer: AudioPlayer
+  audioPlayer: AudioPlayer,
+  sendReplyFunction: (
+    options: MessageCreateOptions | InteractionReplyOptions
+  ) => Promise<Message>
 ) => {
   try {
     if (songQueue.length === 0) {
-      message.channel.send({
+      sendReplyFunction({
         embeds: [
           new EmbedBuilder()
             .setTitle("The queue is already empty!")
             .setDescription(
-              "There is no song that I could skip, " + message.member.nickname
+              "There is no song that I could skip, " + member.nickname
             )
             .setColor("DarkGold"),
         ],
@@ -29,12 +38,12 @@ export const executeSkipSong = async (
 
     const song = songQueue[0];
 
-    await message.channel.send({
+    await sendReplyFunction({
       embeds: [
         new EmbedBuilder()
           .setTitle("Skipping " + song.title)
           .setURL(song.url)
-          .setDescription("This song was skipped by " + message.member.nickname)
+          .setDescription("This song was skipped by " + member.nickname)
           .setThumbnail(song.thumbnail_url)
           .setColor("DarkBlue"),
       ],

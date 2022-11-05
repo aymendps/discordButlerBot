@@ -1,4 +1,12 @@
-import { EmbedBuilder, Message, ChannelType } from "discord.js";
+import {
+  EmbedBuilder,
+  Message,
+  ChannelType,
+  GuildMember,
+  Client,
+  MessageCreateOptions,
+  InteractionReplyOptions,
+} from "discord.js";
 import {
   joinVoiceChannel,
   VoiceConnection,
@@ -20,16 +28,18 @@ export const playSong = (
   finishReply: () => void
 ) => {
   try {
+    audioPlayer.removeAllListeners();
+
     if (!currentSong) {
       connection.destroy();
-      audioPlayer.removeAllListeners();
       finishReply();
       return;
     }
 
     const stream = ytdl(currentSong.url, {
-      filter: "audioonly",
+      filter: "audio",
       highWaterMark: 1 << 25,
+      liveBuffer: 1 << 62,
     });
     const audioResource = createAudioResource(stream);
 
@@ -62,21 +72,40 @@ export const playSong = (
 };
 
 export const executePlaySong = async (
-  message: Message,
+  client: Client,
+  member: GuildMember,
+  urlArg: string,
   songQueue: Song[],
-  audioPlayer: AudioPlayer
+  audioPlayer: AudioPlayer,
+  sendReplyFunction: (
+    options: MessageCreateOptions | InteractionReplyOptions
+  ) => Promise<Message>
 ) => {
   try {
-    const voiceChannel = message.member.voice.channel;
+    if (songQueue.length === 0 && !urlArg) {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("There is nothing to play!")
+            .setDescription(
+              "Add a song to the queue first to start playing music"
+            )
+            .setColor("DarkGold"),
+        ],
+      });
+      return;
+    }
+
+    const voiceChannel = member.voice.channel;
 
     if (
-      message.guild.channels.cache.some(
+      member.guild.channels.cache.some(
         (channel) =>
           channel.type === ChannelType.GuildVoice &&
-          channel.members.has(message.client.user.id)
+          channel.members.has(client.user.id)
       )
     ) {
-      message.channel.send({
+      sendReplyFunction({
         embeds: [
           new EmbedBuilder()
             .setTitle("I am right there!")
@@ -88,10 +117,10 @@ export const executePlaySong = async (
     }
 
     if (!voiceChannel) {
-      message.channel.send({
+      sendReplyFunction({
         embeds: [
           new EmbedBuilder()
-            .setTitle("I can't find you, " + message.member.nickname)
+            .setTitle("I can't find you, " + member.nickname)
             .setDescription(
               "You need to be in a voice channel to start playing music"
             )
@@ -101,10 +130,10 @@ export const executePlaySong = async (
       return;
     }
 
-    const permissions = voiceChannel.permissionsFor(message.client.user);
+    const permissions = voiceChannel.permissionsFor(client.user);
 
     if (!permissions.has("Connect") || !permissions.has("Speak")) {
-      message.channel.send({
+      sendReplyFunction({
         embeds: [
           new EmbedBuilder()
             .setTitle("Let me in!")
@@ -125,12 +154,10 @@ export const executePlaySong = async (
 
     const subscription = connection.subscribe(audioPlayer);
 
-    const args = message.content.split(" ");
-
-    if (args[1]) {
+    if (urlArg) {
       // additional url was given
-      const song = await addSong(args[1], songQueue);
-      await message.channel.send({
+      const song = await addSong(urlArg, songQueue);
+      await sendReplyFunction({
         embeds: [
           new EmbedBuilder()
             .setTitle(song.title)
@@ -150,7 +177,7 @@ export const executePlaySong = async (
       songQueue,
       songQueue[0],
       (song, remaining) => {
-        message.channel.send({
+        sendReplyFunction({
           embeds: [
             new EmbedBuilder()
               .setTitle("Playing " + song.title)
@@ -164,7 +191,7 @@ export const executePlaySong = async (
         });
       },
       () => {
-        message.channel.send({
+        sendReplyFunction({
           embeds: [
             new EmbedBuilder()
               .setTitle("Something went wrong")
@@ -176,7 +203,7 @@ export const executePlaySong = async (
         });
       },
       () => {
-        message.channel.send({
+        sendReplyFunction({
           embeds: [
             new EmbedBuilder()
               .setTitle("I finished my job")
@@ -190,5 +217,13 @@ export const executePlaySong = async (
     );
   } catch (error) {
     console.log(error);
+    sendReplyFunction({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Something went wrong")
+          .setDescription("Could not add or play the request song...")
+          .setColor("DarkRed"),
+      ],
+    });
   }
 };
