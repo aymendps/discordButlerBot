@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/../.env" });
 
 import * as Discord from "discord.js";
-import { token } from "./config";
+import { TOKEN } from "./config";
 import establishListeners from "./events";
 import { Song } from "./interfaces/song";
 import { createAudioPlayer } from "@discordjs/voice";
@@ -28,7 +28,7 @@ const main = async () => {
     console.log("Establishing Butler Bot's listeners...");
     establishListeners(client, songQueue, audioPlayer);
     console.log("Butler Bot is starting...");
-    await client.login(token);
+    await client.login(TOKEN);
   } catch (error) {
     console.log(error);
   }

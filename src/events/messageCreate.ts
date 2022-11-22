@@ -1,6 +1,6 @@
 import { AudioPlayer } from "@discordjs/voice";
 import { Client, Message, MessageCreateOptions } from "discord.js";
-import { prefix } from "../config";
+import { PREFIX } from "../config";
 import { executeAddSong } from "../functions/addSong";
 import { executeHello } from "../functions/hello";
 import { executePlaySong } from "../functions/playSong";
@@ -14,13 +14,13 @@ export default (
   audioPlayer: AudioPlayer
 ) => {
   client.on("messageCreate", async (message: Message) => {
-    if (message.author.bot || !message.content.startsWith(prefix)) return;
+    if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
     const sendReply = async (options: MessageCreateOptions) => {
       return await message.channel.send(options);
     };
 
-    if (message.content.startsWith(prefix + "play")) {
+    if (message.content.startsWith(PREFIX + "play")) {
       const args = message.content.substring(5);
       executePlaySong(
         client,
@@ -30,12 +30,12 @@ export default (
         audioPlayer,
         sendReply
       );
-    } else if (message.content.startsWith(prefix + "skip")) {
+    } else if (message.content.startsWith(PREFIX + "skip")) {
       executeSkipSong(message.member, songQueue, audioPlayer, sendReply);
-    } else if (message.content.startsWith(prefix + "add")) {
+    } else if (message.content.startsWith(PREFIX + "add")) {
       const args = message.content.substring(4);
       executeAddSong(args, songQueue, sendReply);
-    } else if (message.content.startsWith(prefix + "stop")) {
+    } else if (message.content.startsWith(PREFIX + "stop")) {
       const args = message.content.substring(4);
       executeStopSong(
         client,
@@ -44,9 +44,9 @@ export default (
         audioPlayer,
         sendReply
       );
-    } else if (message.content.startsWith(prefix + "replay")) {
+    } else if (message.content.startsWith(PREFIX + "replay")) {
       console.log("replay command");
-    } else if (message.content.startsWith(prefix + "hello")) {
+    } else if (message.content.startsWith(PREFIX + "hello")) {
       executeHello(client, sendReply);
     }
   });
