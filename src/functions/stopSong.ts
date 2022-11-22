@@ -1,5 +1,7 @@
 import { AudioPlayer } from "@discordjs/voice";
 import {
+  ChannelType,
+  Client,
   EmbedBuilder,
   GuildMember,
   InteractionReplyOptions,
@@ -7,13 +9,10 @@ import {
   MessageCreateOptions,
 } from "discord.js";
 import { Song } from "../interfaces/song";
+import { skipSong } from "./skipSong";
 
-export const skipSong = (audioPlayer: AudioPlayer) => {
-  const status = audioPlayer.stop(true);
-  return status;
-};
-
-export const executeSkipSong = async (
+export const executeStopSong = async (
+  client: Client,
   member: GuildMember,
   songQueue: Song[],
   audioPlayer: AudioPlayer,
@@ -22,33 +21,34 @@ export const executeSkipSong = async (
   ) => Promise<Message>
 ) => {
   try {
-    if (songQueue.length === 0) {
+    if (
+      !member.guild.channels.cache.some(
+        (channel) =>
+          channel.type === ChannelType.GuildVoice &&
+          channel.members.has(client.user.id)
+      )
+    ) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
-            .setTitle("The queue is already empty!")
-            .setDescription(
-              "There is no song that I could skip, " + member.nickname
-            )
+            .setTitle("I am not in a voice channel!")
+            .setDescription("I was not requested to start playing music yet")
             .setColor("DarkGold"),
         ],
       });
       return;
     }
 
-    const song = songQueue[0];
-
     await sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle("Skipping " + song.title)
-          .setURL(song.url)
-          .setDescription("This song was skipped by " + member.nickname)
-          .setThumbnail(song.thumbnail_url)
+          .setTitle("Taking a break..")
+          .setDescription("Playing music was stopped by " + member.nickname)
           .setColor("DarkBlue"),
       ],
     });
 
+    songQueue.length = 0;
     skipSong(audioPlayer);
   } catch (error) {
     console.log(error);

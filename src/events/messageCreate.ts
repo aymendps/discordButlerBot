@@ -5,6 +5,7 @@ import { executeAddSong } from "../functions/addSong";
 import { executeHello } from "../functions/hello";
 import { executePlaySong } from "../functions/playSong";
 import { executeSkipSong } from "../functions/skipSong";
+import { executeStopSong } from "../functions/stopSong";
 import { Song } from "../interfaces/song";
 
 export default (
@@ -35,7 +36,14 @@ export default (
       const args = message.content.substring(4);
       executeAddSong(args, songQueue, sendReply);
     } else if (message.content.startsWith(prefix + "stop")) {
-      console.log("stop command");
+      const args = message.content.substring(4);
+      executeStopSong(
+        client,
+        message.member,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
     } else if (message.content.startsWith(prefix + "replay")) {
       console.log("replay command");
     } else if (message.content.startsWith(prefix + "hello")) {
