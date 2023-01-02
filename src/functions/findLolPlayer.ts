@@ -196,6 +196,9 @@ export const executeFindLolPlayer = async (
       embeds: [
         new EmbedBuilder()
           .setTitle("League Of Legends - " + summonerData.name)
+          .setURL(
+            `https://www.op.gg/summoners/euw/${summonerName.replace(/\s/g, "")}`
+          )
           .setThumbnail(summonerData.profileIconLink)
           .setColor("DarkGreen")
           .addFields(

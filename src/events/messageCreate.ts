@@ -2,6 +2,7 @@ import { AudioPlayer } from "@discordjs/voice";
 import { Client, Message, MessageCreateOptions } from "discord.js";
 import { PREFIX } from "../config";
 import { executeAddSong } from "../functions/addSong";
+import { executeFindLolMatch } from "../functions/findActiveLolMatch";
 import { executeFindLolPlayer } from "../functions/findLolPlayer";
 import { executeHello } from "../functions/hello";
 import { executePlaySong } from "../functions/playSong";
@@ -47,6 +48,9 @@ export default (
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9);
       executeFindLolPlayer(args, sendReply);
+    } else if (message.content.startsWith(PREFIX + "match")) {
+      const args = message.content.substring(6);
+      executeFindLolMatch(args, sendReply);
     } else if (message.content.startsWith(PREFIX + "hello")) {
       executeHello(client, sendReply);
     }
