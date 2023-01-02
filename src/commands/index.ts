@@ -1,5 +1,6 @@
 import { Command } from "../interfaces/command";
 import { AddSongCommand } from "./addSong";
+import { FindLolPlayerCommand } from "./findLolPlayer";
 import { HelloCommand } from "./hello";
 import { PlaySongCommand } from "./playSong";
 import { SkipSongCommand } from "./skipSong";
@@ -11,4 +12,5 @@ export const Commands: Command[] = [
   PlaySongCommand,
   SkipSongCommand,
   StopSongCommand,
+  FindLolPlayerCommand,
 ];
