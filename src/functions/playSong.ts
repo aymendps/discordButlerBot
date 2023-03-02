@@ -13,12 +13,14 @@ import {
   AudioPlayer,
   createAudioResource,
   AudioPlayerStatus,
+  VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { Song } from "../interfaces/song";
 import * as ytdl from "ytdl-core";
-import { addSong } from "./addSong";
+import { addSong, executeAddSong } from "./addSong";
+import fs, { createWriteStream } from "fs";
 
-export const playSong = (
+export const playSong = async (
   connection: VoiceConnection,
   audioPlayer: AudioPlayer,
   songQueue: Song[],
@@ -41,6 +43,7 @@ export const playSong = (
       highWaterMark: 1 << 25,
       liveBuffer: 1 << 62,
     });
+
     const audioResource = createAudioResource(stream);
 
     audioPlayer.on("stateChange", (oldState, newState) => {
@@ -105,14 +108,15 @@ export const executePlaySong = async (
           channel.members.has(client.user.id)
       )
     ) {
-      sendReplyFunction({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle("I am right there!")
-            .setDescription("I am already playing music in a voice channel")
-            .setColor("DarkGold"),
-        ],
-      });
+      // sendReplyFunction({
+      //   embeds: [
+      //     new EmbedBuilder()
+      //       .setTitle("I am right there!")
+      //       .setDescription("I am already playing music in a voice channel")
+      //       .setColor("DarkGold"),
+      //   ],
+      // });
+      await executeAddSong(urlArg, songQueue, sendReplyFunction);
       return;
     }
 
@@ -152,7 +156,16 @@ export const executePlaySong = async (
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
 
-    const subscription = connection.subscribe(audioPlayer);
+    connection.on("stateChange", (old_state, new_state) => {
+      if (
+        old_state.status === VoiceConnectionStatus.Ready &&
+        new_state.status === VoiceConnectionStatus.Connecting
+      ) {
+        connection.configureNetworking();
+      }
+    });
+
+    connection.subscribe(audioPlayer);
 
     if (urlArg) {
       // additional url was given
