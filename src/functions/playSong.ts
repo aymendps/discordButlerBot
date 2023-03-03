@@ -156,13 +156,27 @@ export const executePlaySong = async (
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
 
-    connection.on("stateChange", (old_state, new_state) => {
+    connection.on("stateChange", (oldState, newState) => {
       if (
-        old_state.status === VoiceConnectionStatus.Ready &&
-        new_state.status === VoiceConnectionStatus.Connecting
+        oldState.status === VoiceConnectionStatus.Ready &&
+        newState.status === VoiceConnectionStatus.Connecting
       ) {
         connection.configureNetworking();
       }
+
+      const oldNetworking = Reflect.get(oldState, "networking");
+      const newNetworking = Reflect.get(newState, "networking");
+
+      const networkStateChangeHandler = (
+        oldNetworkState: any,
+        newNetworkState: any
+      ) => {
+        const newUdp = Reflect.get(newNetworkState, "udp");
+        clearInterval(newUdp?.keepAliveInterval);
+      };
+
+      oldNetworking?.off("stateChange", networkStateChangeHandler);
+      newNetworking?.on("stateChange", networkStateChangeHandler);
     });
 
     connection.subscribe(audioPlayer);
