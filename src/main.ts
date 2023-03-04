@@ -5,7 +5,7 @@ dotenv.config({ path: __dirname + "/../.env" });
 import * as Discord from "discord.js";
 import { TOKEN } from "./config";
 import establishListeners from "./events";
-import { Song } from "./interfaces/song";
+import { SongQueue } from "./interfaces/song";
 import { createAudioPlayer } from "@discordjs/voice";
 
 const client = new Discord.Client({
@@ -19,7 +19,7 @@ const client = new Discord.Client({
   ],
 });
 
-const songQueue: Song[] = [];
+const songQueue = new SongQueue();
 
 const audioPlayer = createAudioPlayer();
 

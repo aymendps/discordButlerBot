@@ -1,21 +1,13 @@
 import { AudioPlayer } from "@discordjs/voice";
-import {
-  ChannelType,
-  Client,
-  EmbedBuilder,
-  GuildMember,
-  InteractionReplyOptions,
-  Message,
-  MessageCreateOptions,
-} from "discord.js";
+import { ChannelType, Client, EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 import { skipSong } from "./skipSong";
 
 export const executeStopSong = async (
   client: Client,
   member: GuildMember,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer,
   sendReplyFunction: sendReplyFunction
 ) => {
@@ -47,7 +39,7 @@ export const executeStopSong = async (
       ],
     });
 
-    songQueue.length = 0;
+    songQueue.reset();
     skipSong(audioPlayer);
   } catch (error) {
     console.log(error);

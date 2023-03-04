@@ -1,13 +1,7 @@
 import { AudioPlayer } from "@discordjs/voice";
-import {
-  EmbedBuilder,
-  GuildMember,
-  InteractionReplyOptions,
-  Message,
-  MessageCreateOptions,
-} from "discord.js";
+import { EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export const skipSong = (audioPlayer: AudioPlayer) => {
   const status = audioPlayer.stop(true);
@@ -16,12 +10,12 @@ export const skipSong = (audioPlayer: AudioPlayer) => {
 
 export const executeSkipSong = async (
   member: GuildMember,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer,
   sendReplyFunction: sendReplyFunction
 ) => {
   try {
-    if (songQueue.length === 0) {
+    if (songQueue.isEmpty()) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -35,7 +29,7 @@ export const executeSkipSong = async (
       return;
     }
 
-    const song = songQueue[0];
+    const song = songQueue.front();
 
     await sendReplyFunction({
       embeds: [

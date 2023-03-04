@@ -6,10 +6,9 @@ import {
   InteractionReplyOptions,
 } from "discord.js";
 import { sendInteractionReply } from ".";
-import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
 import { Command } from "../interfaces/command";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export const StopSongCommand: Command = {
   name: "stop",
@@ -17,7 +16,7 @@ export const StopSongCommand: Command = {
   run: async (
     client: Client,
     interaction: CommandInteraction,
-    songQueue: Song[],
+    songQueue: SongQueue,
     audioPlayer: AudioPlayer
   ) => {
     executeStopSong(

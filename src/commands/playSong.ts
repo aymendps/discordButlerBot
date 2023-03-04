@@ -9,7 +9,7 @@ import {
 import { sendInteractionReply } from ".";
 import { executePlaySong } from "../functions/playSong";
 import { Command } from "../interfaces/command";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export const PlaySongCommand: Command = {
   name: "play",
@@ -24,7 +24,7 @@ export const PlaySongCommand: Command = {
   run: async (
     client: Client,
     interaction: CommandInteraction,
-    songQueue: Song[],
+    songQueue: SongQueue,
     audioPlayer: AudioPlayer
   ) => {
     executePlaySong(

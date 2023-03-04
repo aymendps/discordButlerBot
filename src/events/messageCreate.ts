@@ -8,11 +8,11 @@ import { executeHello } from "../functions/hello";
 import { executePlaySong } from "../functions/playSong";
 import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export default (
   client: Client,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer
 ) => {
   client.on("messageCreate", async (message: Message) => {

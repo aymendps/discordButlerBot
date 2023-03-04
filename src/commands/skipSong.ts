@@ -8,7 +8,7 @@ import {
 import { sendInteractionReply } from ".";
 import { executeSkipSong } from "../functions/skipSong";
 import { Command } from "../interfaces/command";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export const SkipSongCommand: Command = {
   name: "skip",
@@ -16,7 +16,7 @@ export const SkipSongCommand: Command = {
   run: async (
     client: Client,
     interaction: CommandInteraction,
-    songQueue: Song[],
+    songQueue: SongQueue,
     audioPlayer: AudioPlayer
   ) => {
     executeSkipSong(

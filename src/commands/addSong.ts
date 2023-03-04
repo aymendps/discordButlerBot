@@ -5,9 +5,9 @@ import {
   ApplicationCommandOptionType,
 } from "discord.js";
 import { sendInteractionReply } from ".";
-import { addSong, executeAddSong } from "../functions/addSong";
+import { executeAddSong } from "../functions/addSong";
 import { Command } from "../interfaces/command";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 export const AddSongCommand: Command = {
   name: "add",
@@ -23,7 +23,7 @@ export const AddSongCommand: Command = {
   run: async (
     client: Client,
     interaction: CommandInteraction,
-    songQueue: Song[]
+    songQueue: SongQueue
   ) => {
     executeAddSong(
       interaction.options.get("url", true).value as string,

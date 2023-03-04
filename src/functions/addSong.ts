@@ -1,15 +1,10 @@
-import {
-  EmbedBuilder,
-  InteractionReplyOptions,
-  Message,
-  MessageCreateOptions,
-} from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import * as ytdl from "ytdl-core";
-import { Song } from "../interfaces/song";
+import { Song, SongQueue } from "../interfaces/song";
 import { youtube } from "scrape-youtube";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 
-export const addSong = async (url: string, songQueue: Song[]) => {
+export const addSong = async (url: string, songQueue: SongQueue) => {
   try {
     if (url) {
       let song: Song = null;
@@ -45,7 +40,7 @@ export const addSong = async (url: string, songQueue: Song[]) => {
 
 export const executeAddSong = async (
   urlArgs: string,
-  songQueue: Song[],
+  songQueue: SongQueue,
   sendReplyFunction: sendReplyFunction
 ) => {
   if (!urlArgs) {
@@ -68,7 +63,7 @@ export const executeAddSong = async (
           .setTitle(song.title)
           .setURL(song.url)
           .setDescription(
-            "Added " + song.title + " to the queue: #" + songQueue.length
+            "Added " + song.title + " to the queue: #" + songQueue.length()
           )
           .setThumbnail(song.thumbnail_url)
           .setColor("DarkGreen"),

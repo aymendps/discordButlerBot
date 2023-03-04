@@ -1,12 +1,4 @@
-import {
-  EmbedBuilder,
-  Message,
-  ChannelType,
-  GuildMember,
-  Client,
-  MessageCreateOptions,
-  InteractionReplyOptions,
-} from "discord.js";
+import { EmbedBuilder, ChannelType, GuildMember, Client } from "discord.js";
 import {
   joinVoiceChannel,
   VoiceConnection,
@@ -15,16 +7,15 @@ import {
   AudioPlayerStatus,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { Song } from "../interfaces/song";
+import { Song, SongQueue } from "../interfaces/song";
 import * as ytdl from "ytdl-core";
 import { addSong, executeAddSong } from "./addSong";
-import fs, { createWriteStream } from "fs";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 
 export const playSong = async (
   connection: VoiceConnection,
   audioPlayer: AudioPlayer,
-  songQueue: Song[],
+  songQueue: SongQueue,
   currentSong: Song,
   successReply: (song: Song, remaining: number) => void,
   errorReply: () => void,
@@ -49,12 +40,11 @@ export const playSong = async (
 
     audioPlayer.on("stateChange", (oldState, newState) => {
       if (newState.status === AudioPlayerStatus.Idle) {
-        songQueue.shift();
         playSong(
           connection,
           audioPlayer,
           songQueue,
-          songQueue[0],
+          songQueue.pop(),
           successReply,
           errorReply,
           finishReply
@@ -69,7 +59,7 @@ export const playSong = async (
 
     audioPlayer.play(audioResource);
 
-    successReply(currentSong, songQueue.length - 1);
+    successReply(currentSong, songQueue.length());
   } catch (error) {
     console.log(error);
   }
@@ -79,12 +69,12 @@ export const executePlaySong = async (
   client: Client,
   member: GuildMember,
   urlArg: string,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer,
   sendReplyFunction: sendReplyFunction
 ) => {
   try {
-    if (songQueue.length === 0 && !urlArg) {
+    if (songQueue.isEmpty() && !urlArg) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -107,14 +97,6 @@ export const executePlaySong = async (
           channel.members.has(client.user.id)
       )
     ) {
-      // sendReplyFunction({
-      //   embeds: [
-      //     new EmbedBuilder()
-      //       .setTitle("I am right there!")
-      //       .setDescription("I am already playing music in a voice channel")
-      //       .setColor("DarkGold"),
-      //   ],
-      // });
       await executeAddSong(urlArg, songQueue, sendReplyFunction);
       return;
     }
@@ -189,7 +171,7 @@ export const executePlaySong = async (
             .setTitle(song.title)
             .setURL(song.url)
             .setDescription(
-              "Added " + song.title + " to the queue: #" + songQueue.length
+              "Added " + song.title + " to the queue: #" + songQueue.length()
             )
             .setThumbnail(song.thumbnail_url)
             .setColor("DarkGreen"),
@@ -201,7 +183,7 @@ export const executePlaySong = async (
       connection,
       audioPlayer,
       songQueue,
-      songQueue[0],
+      songQueue.pop(),
       (song, remaining) => {
         sendReplyFunction({
           embeds: [

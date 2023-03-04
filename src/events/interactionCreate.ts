@@ -1,12 +1,12 @@
 import { AudioPlayer } from "@discordjs/voice";
 import { Client, Interaction, CommandInteraction } from "discord.js";
 import { Commands } from "../commands";
-import { Song } from "../interfaces/song";
+import { SongQueue } from "../interfaces/song";
 
 const handleSlashCommand = async (
   client: Client,
   interaction: CommandInteraction,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer
 ) => {
   const slashCommand = Commands.find(
@@ -29,7 +29,7 @@ const handleSlashCommand = async (
 
 export default (
   client: Client,
-  songQueue: Song[],
+  songQueue: SongQueue,
   audioPlayer: AudioPlayer
 ) => {
   client.on("interactionCreate", async (interaction: Interaction) => {
