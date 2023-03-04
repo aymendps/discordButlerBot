@@ -26,6 +26,7 @@ export const playSong = async (
 
     if (!currentSong) {
       connection.destroy();
+      songQueue.setCurrent(undefined);
       finishReply();
       return;
     }
@@ -56,6 +57,8 @@ export const playSong = async (
       console.log(error);
       errorReply();
     });
+
+    songQueue.setCurrent(currentSong);
 
     audioPlayer.play(audioResource);
 

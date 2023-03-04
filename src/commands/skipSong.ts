@@ -20,6 +20,7 @@ export const SkipSongCommand: Command = {
     audioPlayer: AudioPlayer
   ) => {
     executeSkipSong(
+      client,
       interaction.member as GuildMember,
       songQueue,
       audioPlayer,

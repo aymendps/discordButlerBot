@@ -5,6 +5,7 @@ import { executeAddSong } from "../functions/addSong";
 import { executeFindLolMatch } from "../functions/findActiveLolMatch";
 import { executeFindLolPlayer } from "../functions/findLolPlayer";
 import { executeHello } from "../functions/hello";
+import { executeLoopSong } from "../functions/loopSong";
 import { executePlaySong } from "../functions/playSong";
 import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
@@ -33,7 +34,13 @@ export default (
         sendReply
       );
     } else if (message.content.startsWith(PREFIX + "skip")) {
-      executeSkipSong(message.member, songQueue, audioPlayer, sendReply);
+      executeSkipSong(
+        client,
+        message.member,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
     } else if (message.content.startsWith(PREFIX + "add")) {
       const args = message.content.substring(4);
       executeAddSong(args, songQueue, sendReply);
@@ -45,6 +52,8 @@ export default (
         audioPlayer,
         sendReply
       );
+    } else if (message.content.startsWith(PREFIX + "loop")) {
+      executeLoopSong(songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9);
       executeFindLolPlayer(args, sendReply);
