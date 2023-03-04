@@ -8,6 +8,7 @@ import {
   Message,
   MessageCreateOptions,
 } from "discord.js";
+import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { Song } from "../interfaces/song";
 import { skipSong } from "./skipSong";
 
@@ -16,9 +17,7 @@ export const executeStopSong = async (
   member: GuildMember,
   songQueue: Song[],
   audioPlayer: AudioPlayer,
-  sendReplyFunction: (
-    options: MessageCreateOptions | InteractionReplyOptions
-  ) => Promise<Message>
+  sendReplyFunction: sendReplyFunction
 ) => {
   try {
     if (

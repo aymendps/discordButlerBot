@@ -4,6 +4,7 @@ import {
   InteractionReplyOptions,
   ApplicationCommandOptionType,
 } from "discord.js";
+import { sendInteractionReply } from ".";
 import { addSong, executeAddSong } from "../functions/addSong";
 import { Command } from "../interfaces/command";
 import { Song } from "../interfaces/song";
@@ -28,7 +29,7 @@ export const AddSongCommand: Command = {
       interaction.options.get("url", true).value as string,
       songQueue,
       async (options: InteractionReplyOptions) => {
-        return await interaction.followUp(options);
+        return await sendInteractionReply(interaction, options);
       }
     );
   },

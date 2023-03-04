@@ -19,6 +19,7 @@ import { Song } from "../interfaces/song";
 import * as ytdl from "ytdl-core";
 import { addSong, executeAddSong } from "./addSong";
 import fs, { createWriteStream } from "fs";
+import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -80,9 +81,7 @@ export const executePlaySong = async (
   urlArg: string,
   songQueue: Song[],
   audioPlayer: AudioPlayer,
-  sendReplyFunction: (
-    options: MessageCreateOptions | InteractionReplyOptions
-  ) => Promise<Message>
+  sendReplyFunction: sendReplyFunction
 ) => {
   try {
     if (songQueue.length === 0 && !urlArg) {

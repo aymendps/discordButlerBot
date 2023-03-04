@@ -4,6 +4,7 @@ import {
   InteractionReplyOptions,
   ApplicationCommandOptionType,
 } from "discord.js";
+import { sendInteractionReply } from ".";
 import { executeFindLolMatch } from "../functions/findActiveLolMatch";
 import { executeFindLolPlayer } from "../functions/findLolPlayer";
 import { Command } from "../interfaces/command";
@@ -23,7 +24,7 @@ export const findActiveLolMatchCommand: Command = {
     executeFindLolMatch(
       interaction.options.get("summoner").value as string,
       async (options: InteractionReplyOptions) => {
-        return await interaction.followUp(options);
+        return await sendInteractionReply(interaction, options);
       }
     );
   },

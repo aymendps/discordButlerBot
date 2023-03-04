@@ -3,6 +3,7 @@ import {
   Client,
   InteractionReplyOptions,
 } from "discord.js";
+import { sendInteractionReply } from ".";
 import { executeHello } from "../functions/hello";
 import { Command } from "../interfaces/command";
 
@@ -11,7 +12,7 @@ export const HelloCommand: Command = {
   description: "The first command ever made",
   run: async (client: Client, interaction: CommandInteraction) => {
     executeHello(client, async (options: InteractionReplyOptions) => {
-      return await interaction.followUp(options);
+      return await sendInteractionReply(interaction, options);
     });
   },
 };

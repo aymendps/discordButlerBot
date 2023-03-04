@@ -7,6 +7,7 @@ import {
 import * as ytdl from "ytdl-core";
 import { Song } from "../interfaces/song";
 import { youtube } from "scrape-youtube";
+import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 
 export const addSong = async (url: string, songQueue: Song[]) => {
   try {
@@ -45,9 +46,7 @@ export const addSong = async (url: string, songQueue: Song[]) => {
 export const executeAddSong = async (
   urlArgs: string,
   songQueue: Song[],
-  sendReplyFunction: (
-    options: MessageCreateOptions | InteractionReplyOptions
-  ) => Promise<Message>
+  sendReplyFunction: sendReplyFunction
 ) => {
   if (!urlArgs) {
     sendReplyFunction({

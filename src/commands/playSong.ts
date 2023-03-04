@@ -6,6 +6,7 @@ import {
   GuildMember,
   InteractionReplyOptions,
 } from "discord.js";
+import { sendInteractionReply } from ".";
 import { executePlaySong } from "../functions/playSong";
 import { Command } from "../interfaces/command";
 import { Song } from "../interfaces/song";
@@ -33,7 +34,7 @@ export const PlaySongCommand: Command = {
       songQueue,
       audioPlayer,
       async (options: InteractionReplyOptions) => {
-        return await interaction.followUp(options);
+        return await sendInteractionReply(interaction, options);
       }
     );
   },

@@ -10,6 +10,7 @@ dotenv.config({ path: __dirname + "/../../.env" });
 import { RIOT_TOKEN, LEAGUE_OF_LEGENDS_PATCH } from "../config";
 import { ChampionMasteryDTO } from "../interfaces/championMastery.dto";
 import { LeagueEntryDTO } from "../interfaces/leagueEntry.dto";
+import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { SummonerDTO } from "../interfaces/summoner.dto";
 
 const findLolPlayer = async (summonerName: string) => {
@@ -76,9 +77,7 @@ const findLolPlayer = async (summonerName: string) => {
 
 export const executeFindLolPlayer = async (
   summonerName: string,
-  sendReplyFunction: (
-    options: MessageCreateOptions | InteractionReplyOptions
-  ) => Promise<Message>
+  sendReplyFunction: sendReplyFunction
 ) => {
   try {
     const summonerData = await findLolPlayer(summonerName);

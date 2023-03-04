@@ -5,12 +5,11 @@ import {
   InteractionReplyOptions,
   Client,
 } from "discord.js";
+import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 
 export const executeHello = (
   client: Client,
-  sendReplyFunction: (
-    options: MessageCreateOptions | InteractionReplyOptions
-  ) => Promise<Message>
+  sendReplyFunction: sendReplyFunction
 ) => {
   sendReplyFunction({
     embeds: [

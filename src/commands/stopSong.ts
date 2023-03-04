@@ -5,6 +5,7 @@ import {
   GuildMember,
   InteractionReplyOptions,
 } from "discord.js";
+import { sendInteractionReply } from ".";
 import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
 import { Command } from "../interfaces/command";
@@ -25,7 +26,7 @@ export const StopSongCommand: Command = {
       songQueue,
       audioPlayer,
       async (options: InteractionReplyOptions) => {
-        return await interaction.followUp(options);
+        return await sendInteractionReply(interaction, options);
       }
     );
   },
