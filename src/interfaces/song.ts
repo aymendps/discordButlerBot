@@ -6,32 +6,13 @@ export interface Song {
 
 export class SongQueue {
   private queue: Song[];
-  private previous: Song[];
   private current: Song;
   private isLooping: boolean;
 
   public constructor() {
     this.queue = [];
-    this.previous = [];
     this.current = undefined;
     this.isLooping = false;
-  }
-
-  private addToPrevious(song: Song) {
-    if (
-      this.previous.length === 0 ||
-      this.previous[this.previous.length - 1].url !== song.url
-    ) {
-      this.previous.push(song);
-    }
-  }
-
-  public getPrevious() {
-    return this.previous.pop();
-  }
-
-  public setCurrent(song: Song) {
-    this.current = song;
   }
 
   public getCurrent() {
@@ -67,13 +48,15 @@ export class SongQueue {
       return undefined;
     }
 
-    this.addToPrevious(this.queue[0]);
-
-    if (this.isLooping && this.current) {
-      return this.current;
-    } else {
-      return this.queue.shift();
+    if (!(this.isLooping && this.current)) {
+      this.current = this.queue.shift();
     }
+
+    return this.current;
+  }
+
+  public undoPush() {
+    return this.queue.pop();
   }
 
   public reset() {

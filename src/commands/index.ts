@@ -12,6 +12,7 @@ import { LoopSongCommand } from "./loopSong";
 import { PlaySongCommand } from "./playSong";
 import { SkipSongCommand } from "./skipSong";
 import { StopSongCommand } from "./stopSong";
+import { UndoAddSongCommand } from "./undoAddSong";
 
 export const sendInteractionReply = async (
   interaction: CommandInteraction,
@@ -31,6 +32,7 @@ export const Commands: Command[] = [
   SkipSongCommand,
   StopSongCommand,
   LoopSongCommand,
+  UndoAddSongCommand,
   FindLolPlayerCommand,
   findActiveLolMatchCommand,
 ];
