@@ -1,13 +1,8 @@
 import axios, { AxiosResponse } from "axios";
-import {
-  EmbedBuilder,
-  InteractionReplyOptions,
-  Message,
-  MessageCreateOptions,
-} from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/../../.env" });
-import { RIOT_TOKEN, LEAGUE_OF_LEGENDS_PATCH } from "../config";
+import { RIOT_TOKEN } from "../config";
 import { CurrentLoLMatchDTO } from "../interfaces/currentLoLMatch.dto";
 import { LolTeamDTO } from "../interfaces/LolTeam.dto";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
@@ -47,8 +42,12 @@ const findActiveLolMatch = async (summonerName: string) => {
       }
     });
 
+    const patch = await axios.get(
+      "https://ddragon.leagueoflegends.com/api/versions.json"
+    );
+
     const { data } = await axios.get(
-      `http://ddragon.leagueoflegends.com/cdn/${LEAGUE_OF_LEGENDS_PATCH}/data/en_US/champion.json`
+      `http://ddragon.leagueoflegends.com/cdn/${patch.data[0]}/data/en_US/champion.json`
     );
 
     const champions: Object = data.data;

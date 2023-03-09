@@ -1,13 +1,8 @@
 import axios, { AxiosResponse } from "axios";
-import {
-  EmbedBuilder,
-  InteractionReplyOptions,
-  Message,
-  MessageCreateOptions,
-} from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname + "/../../.env" });
-import { RIOT_TOKEN, LEAGUE_OF_LEGENDS_PATCH } from "../config";
+import { RIOT_TOKEN } from "../config";
 import { ChampionMasteryDTO } from "../interfaces/championMastery.dto";
 import { LeagueEntryDTO } from "../interfaces/leagueEntry.dto";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
@@ -19,7 +14,12 @@ const findLolPlayer = async (summonerName: string) => {
       `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${summonerName}?api_key=${RIOT_TOKEN}`
     );
     const { id, profileIconId, summonerLevel, name } = summoner.data;
-    const profileIconLink = `https://ddragon.leagueoflegends.com/cdn/${LEAGUE_OF_LEGENDS_PATCH}/img/profileicon/${profileIconId}.png`;
+
+    const patch = await axios.get(
+      "https://ddragon.leagueoflegends.com/api/versions.json"
+    );
+
+    const profileIconLink = `https://ddragon.leagueoflegends.com/cdn/${patch.data[0]}/img/profileicon/${profileIconId}.png`;
 
     const { data: leagueEntries }: AxiosResponse<LeagueEntryDTO[]> =
       await axios.get(
@@ -43,7 +43,7 @@ const findLolPlayer = async (summonerName: string) => {
     });
 
     const { data } = await axios.get(
-      `http://ddragon.leagueoflegends.com/cdn/${LEAGUE_OF_LEGENDS_PATCH}/data/en_US/champion.json`
+      `http://ddragon.leagueoflegends.com/cdn/${patch.data[0]}/data/en_US/champion.json`
     );
 
     const champions: Object = data.data;
