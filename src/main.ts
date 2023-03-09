@@ -6,7 +6,7 @@ import * as Discord from "discord.js";
 import { TOKEN } from "./config";
 import establishListeners from "./events";
 import { SongQueue } from "./interfaces/song";
-import { createAudioPlayer } from "@discordjs/voice";
+import { createAudioPlayer, NoSubscriberBehavior } from "@discordjs/voice";
 
 const client = new Discord.Client({
   intents: [
@@ -21,7 +21,11 @@ const client = new Discord.Client({
 
 const songQueue = new SongQueue();
 
-const audioPlayer = createAudioPlayer();
+const audioPlayer = createAudioPlayer({
+  behaviors: {
+    noSubscriber: NoSubscriberBehavior.Play,
+  },
+});
 
 const main = async () => {
   try {

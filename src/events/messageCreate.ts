@@ -25,7 +25,7 @@ export default (
     };
 
     if (message.content.startsWith(PREFIX + "play")) {
-      const args = message.content.substring(5);
+      const args = message.content.substring(5).trim();
       executePlaySong(
         client,
         message.member,
@@ -43,7 +43,7 @@ export default (
         sendReply
       );
     } else if (message.content.startsWith(PREFIX + "add")) {
-      const args = message.content.substring(4);
+      const args = message.content.substring(4).trim();
       executeAddSong(args, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "stop")) {
       executeStopSong(
@@ -58,10 +58,10 @@ export default (
     } else if (message.content.startsWith(PREFIX + "undo-add")) {
       executeUndoAddSong(message.member, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "summoner")) {
-      const args = message.content.substring(9);
+      const args = message.content.substring(9).trim();
       executeFindLolPlayer(args, sendReply);
     } else if (message.content.startsWith(PREFIX + "match")) {
-      const args = message.content.substring(6);
+      const args = message.content.substring(6).trim();
       executeFindLolMatch(args, sendReply);
     } else if (message.content.startsWith(PREFIX + "hello")) {
       executeHello(client, sendReply);

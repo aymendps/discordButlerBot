@@ -1,35 +1,45 @@
 import { EmbedBuilder } from "discord.js";
-import * as ytdl from "ytdl-core";
 import { Song, SongQueue } from "../interfaces/song";
-import { youtube } from "scrape-youtube";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
+import play from "play-dl";
 
-export const addSong = async (url: string, songQueue: SongQueue) => {
+export const addSong = async (
+  url: string,
+  songQueue: SongQueue
+): Promise<Song> => {
   try {
     if (url) {
-      let song: Song = null;
-      if (url.includes("www.youtube.com")) {
-        const songInfo = await ytdl.getInfo(url);
-        song = {
-          title: songInfo.videoDetails.title,
-          url: songInfo.videoDetails.video_url,
-          thumbnail_url: songInfo.videoDetails?.thumbnails[0]?.url,
+      if (url.startsWith("https") && play.yt_validate(url) === "playlist") {
+        const playlist = await play.playlist_info(url);
+        const videos = await playlist.all_videos();
+
+        const songs: Song[] = videos.map((v) => {
+          return {
+            title: v.title,
+            url: v.url,
+            thumbnail_url: v.thumbnails[0].url,
+          };
+        });
+        songs.forEach((song) => {
+          songQueue.push(song);
+        });
+
+        return {
+          title: `Playlist - ${playlist.title} - ${songs.length} Songs`,
+          url: playlist.url,
+          thumbnail_url: playlist.thumbnail.url,
         };
       } else {
-        const { videos } = await youtube.search(url, { type: "any" });
-        if (videos[0]) {
-          song = {
-            title: videos[0].title,
-            url: videos[0].link,
-            thumbnail_url: videos[0].thumbnail,
-          };
-        }
-      }
-      if (song) {
+        const songInfo = await play.search(url, { limit: 1 });
+
+        const song: Song = {
+          title: songInfo[0].title,
+          url: songInfo[0].url,
+          thumbnail_url: songInfo[0].thumbnails[0].url,
+        };
+
         songQueue.push(song);
         return song;
-      } else {
-        throw "No valid song was found";
       }
     }
   } catch (error) {
@@ -54,18 +64,18 @@ export const executeAddSong = async (
     return;
   }
 
-  const song = await addSong(urlArgs, songQueue);
+  const result = await addSong(urlArgs, songQueue);
 
-  if (song) {
+  if (result) {
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle(song.title)
-          .setURL(song.url)
+          .setTitle(result.title)
+          .setURL(result.url)
           .setDescription(
-            "Added " + song.title + " to the queue: #" + songQueue.length()
+            "Added " + result.title + " to the queue: #" + songQueue.length()
           )
-          .setThumbnail(song.thumbnail_url)
+          .setThumbnail(result.thumbnail_url)
           .setColor("DarkGreen"),
       ],
     });

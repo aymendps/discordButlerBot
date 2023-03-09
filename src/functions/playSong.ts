@@ -8,9 +8,17 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { Song, SongQueue } from "../interfaces/song";
-import * as ytdl from "ytdl-core";
 import { addSong, executeAddSong } from "./addSong";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
+import play from "play-dl";
+
+const networkStateChangeHandler = (
+  oldNetworkState: any,
+  newNetworkState: any
+) => {
+  const newUdp = Reflect.get(newNetworkState, "udp");
+  clearInterval(newUdp?.keepAliveInterval);
+};
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -26,18 +34,15 @@ export const playSong = async (
 
     if (!currentSong) {
       connection.destroy();
-      songQueue.setCurrent(undefined);
       finishReply();
       return;
     }
 
-    const stream = ytdl(currentSong.url, {
-      filter: "audio",
-      highWaterMark: 1 << 25,
-      liveBuffer: 1 << 62,
-    });
+    const stream = await play.stream(currentSong.url);
 
-    const audioResource = createAudioResource(stream);
+    const audioResource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+    });
 
     audioPlayer.on("stateChange", (oldState, newState) => {
       if (newState.status === AudioPlayerStatus.Idle) {
@@ -57,8 +62,6 @@ export const playSong = async (
       console.log(error);
       errorReply();
     });
-
-    songQueue.setCurrent(currentSong);
 
     audioPlayer.play(audioResource);
 
@@ -148,19 +151,15 @@ export const executePlaySong = async (
         connection.configureNetworking();
       }
 
-      const oldNetworking = Reflect.get(oldState, "networking");
-      const newNetworking = Reflect.get(newState, "networking");
+      Reflect.get(oldState, "networking")?.off(
+        "stateChange",
+        networkStateChangeHandler
+      );
 
-      const networkStateChangeHandler = (
-        oldNetworkState: any,
-        newNetworkState: any
-      ) => {
-        const newUdp = Reflect.get(newNetworkState, "udp");
-        clearInterval(newUdp?.keepAliveInterval);
-      };
-
-      oldNetworking?.off("stateChange", networkStateChangeHandler);
-      newNetworking?.on("stateChange", networkStateChangeHandler);
+      Reflect.get(newState, "networking")?.on(
+        "stateChange",
+        networkStateChangeHandler
+      );
     });
 
     connection.subscribe(audioPlayer);
