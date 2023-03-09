@@ -45,6 +45,7 @@ export const playSong = async (
     });
 
     audioPlayer.on("stateChange", (oldState, newState) => {
+      console.log(newState.status);
       if (newState.status === AudioPlayerStatus.Idle) {
         playSong(
           connection,

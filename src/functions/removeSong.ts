@@ -2,15 +2,18 @@ import { EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { SongQueue } from "../interfaces/song";
 
-export const executeUndoAddSong = async (
+export const executeRemoveSong = async (
   member: GuildMember,
   songQueue: SongQueue,
+  howMany: string,
   sendReplyFunction: sendReplyFunction
 ) => {
   try {
-    const song = songQueue.undoPush();
+    const removedSongs: number = howMany
+      ? songQueue.remove(parseInt(howMany))
+      : songQueue.remove();
 
-    if (!song) {
+    if (removedSongs === 0) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -27,12 +30,10 @@ export const executeUndoAddSong = async (
     await sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle("Removed " + song.title + " from the queue")
-          .setURL(song.url)
+          .setTitle(`Removed ${removedSongs} songs from the queue`)
           .setDescription(
-            "This recently added song was removed by " + member.nickname
+            `There are ${songQueue.length()} other songs remaining in the queue`
           )
-          .setThumbnail(song.thumbnail_url)
           .setColor("DarkBlue"),
       ],
     });
@@ -42,9 +43,7 @@ export const executeUndoAddSong = async (
       embeds: [
         new EmbedBuilder()
           .setTitle("Something went wrong")
-          .setDescription(
-            "Could not remove the recently added song from the queue..."
-          )
+          .setDescription("Could not remove songs from the queue...")
           .setColor("DarkRed"),
       ],
     });

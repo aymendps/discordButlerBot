@@ -55,8 +55,24 @@ export class SongQueue {
     return this.current;
   }
 
-  public undoPush() {
-    return this.queue.pop();
+  public remove(howMany: number = 1) {
+    if (
+      howMany <= 0 ||
+      howMany === null ||
+      howMany === undefined ||
+      isNaN(howMany)
+    ) {
+      return 0;
+    }
+
+    if (howMany > this.queue.length) {
+      var temp = this.queue.length;
+      this.queue.length = 0;
+      return temp;
+    } else {
+      this.queue.length -= howMany;
+      return howMany;
+    }
   }
 
   public reset() {

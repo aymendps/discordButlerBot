@@ -9,7 +9,7 @@ import { executeLoopSong } from "../functions/loopSong";
 import { executePlaySong } from "../functions/playSong";
 import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
-import { executeUndoAddSong } from "../functions/undoAddSong";
+import { executeRemoveSong } from "../functions/removeSong";
 import { SongQueue } from "../interfaces/song";
 
 export default (
@@ -55,8 +55,9 @@ export default (
       );
     } else if (message.content.startsWith(PREFIX + "loop")) {
       executeLoopSong(songQueue, sendReply);
-    } else if (message.content.startsWith(PREFIX + "undo-add")) {
-      executeUndoAddSong(message.member, songQueue, sendReply);
+    } else if (message.content.startsWith(PREFIX + "remove")) {
+      const args = message.content.substring(7).trim();
+      executeRemoveSong(message.member, songQueue, args, sendReply);
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9).trim();
       executeFindLolPlayer(args, sendReply);
