@@ -29,6 +29,17 @@ export const addSong = async (
           url: playlist.url,
           thumbnail_url: playlist.thumbnail.url,
         };
+      } else if (url.startsWith("https") && play.yt_validate(url) === "video") {
+        const songInfo = await play.video_info(url);
+
+        const song: Song = {
+          title: songInfo.video_details.title,
+          url: songInfo.video_details.url,
+          thumbnail_url: songInfo.video_details.thumbnails[0].url,
+        };
+
+        songQueue.push(song);
+        return song;
       } else {
         const songInfo = await play.search(url, { limit: 1 });
 
@@ -64,18 +75,18 @@ export const executeAddSong = async (
     return;
   }
 
-  const result = await addSong(urlArgs, songQueue);
+  const song = await addSong(urlArgs, songQueue);
 
-  if (result) {
+  if (song) {
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle(result.title)
-          .setURL(result.url)
+          .setTitle(song.title)
+          .setURL(song.url)
           .setDescription(
-            "Added " + result.title + " to the queue: #" + songQueue.length()
+            "Added " + song.title + " to the queue: #" + songQueue.length()
           )
-          .setThumbnail(result.thumbnail_url)
+          .setThumbnail(song.thumbnail_url)
           .setColor("DarkGreen"),
       ],
     });
