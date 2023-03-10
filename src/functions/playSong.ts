@@ -145,12 +145,12 @@ export const executePlaySong = async (
     });
 
     connection.on("stateChange", (oldState, newState) => {
-      if (
-        oldState.status === VoiceConnectionStatus.Ready &&
-        newState.status === VoiceConnectionStatus.Connecting
-      ) {
-        connection.configureNetworking();
-      }
+      // if (
+      //   oldState.status === VoiceConnectionStatus.Ready &&
+      //   newState.status === VoiceConnectionStatus.Connecting
+      // ) {
+      //   connection.configureNetworking();
+      // }
 
       Reflect.get(oldState, "networking")?.off(
         "stateChange",
