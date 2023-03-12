@@ -2,6 +2,7 @@ import {
   CommandInteraction,
   InteractionReplyOptions,
   MessageCreateOptions,
+  TextChannel,
 } from "discord.js";
 import { Command } from "../interfaces/command";
 import { AddSongCommand } from "./addSong";
@@ -21,7 +22,8 @@ export const sendInteractionReply = async (
   try {
     return await interaction.followUp(options);
   } catch (error) {
-    return await interaction.channel.send(options as MessageCreateOptions);
+    const channel = interaction.channel as TextChannel;
+    return await channel.send(options as MessageCreateOptions);
   }
 };
 

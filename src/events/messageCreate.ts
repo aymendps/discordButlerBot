@@ -1,5 +1,5 @@
 import { AudioPlayer } from "@discordjs/voice";
-import { Client, Message, MessageCreateOptions } from "discord.js";
+import { Client, Message, MessageCreateOptions, TextChannel } from "discord.js";
 import { PREFIX } from "../config";
 import { executeAddSong } from "../functions/addSong";
 import { executeFindLolMatch } from "../functions/findActiveLolMatch";
@@ -21,7 +21,8 @@ export default (
     if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
     const sendReply = async (options: MessageCreateOptions) => {
-      return await message.channel.send(options);
+      const channel = message.channel as TextChannel;
+      return await channel.send(options);
     };
 
     if (message.content.startsWith(PREFIX + "play")) {

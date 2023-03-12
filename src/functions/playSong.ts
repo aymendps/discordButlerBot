@@ -5,20 +5,11 @@ import {
   AudioPlayer,
   createAudioResource,
   AudioPlayerStatus,
-  VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { Song, SongQueue } from "../interfaces/song";
 import { addSong, executeAddSong } from "./addSong";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
-
-const networkStateChangeHandler = (
-  oldNetworkState: any,
-  newNetworkState: any
-) => {
-  const newUdp = Reflect.get(newNetworkState, "udp");
-  clearInterval(newUdp?.keepAliveInterval);
-};
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -142,25 +133,6 @@ export const executePlaySong = async (
       channelId: voiceChannel.id,
       guildId: voiceChannel.guild.id,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-    });
-
-    connection.on("stateChange", (oldState, newState) => {
-      // if (
-      //   oldState.status === VoiceConnectionStatus.Ready &&
-      //   newState.status === VoiceConnectionStatus.Connecting
-      // ) {
-      //   connection.configureNetworking();
-      // }
-
-      Reflect.get(oldState, "networking")?.off(
-        "stateChange",
-        networkStateChangeHandler
-      );
-
-      Reflect.get(newState, "networking")?.on(
-        "stateChange",
-        networkStateChangeHandler
-      );
     });
 
     connection.subscribe(audioPlayer);
