@@ -11,6 +11,7 @@ import { executeSkipSong } from "../functions/skipSong";
 import { executeStopSong } from "../functions/stopSong";
 import { executeRemoveSong } from "../functions/removeSong";
 import { SongQueue } from "../interfaces/song";
+import { executeSeekSongTime } from "../functions/seekSongTime";
 
 export default (
   client: Client,
@@ -59,6 +60,15 @@ export default (
     } else if (message.content.startsWith(PREFIX + "remove")) {
       const args = message.content.substring(7).trim();
       executeRemoveSong(message.member, songQueue, args, sendReply);
+    } else if (message.content.startsWith(PREFIX + "seek")) {
+      const args = message.content.substring(5).trim();
+      executeSeekSongTime(
+        message.member,
+        args,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9).trim();
       executeFindLolPlayer(args, sendReply);
