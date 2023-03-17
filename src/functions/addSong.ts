@@ -10,6 +10,7 @@ export const addSong = async (
   try {
     if (url) {
       if (url.startsWith("https") && play.yt_validate(url) === "playlist") {
+        console.log(url);
         const playlist = await play.playlist_info(url);
         const videos = await playlist.all_videos();
 
@@ -27,7 +28,9 @@ export const addSong = async (
         return {
           title: `Playlist - ${playlist.title} - ${songs.length} Songs`,
           url: playlist.url,
-          thumbnail_url: playlist.thumbnail.url,
+          thumbnail_url: playlist.thumbnail
+            ? playlist.thumbnail.url
+            : songs[0].thumbnail_url,
         };
       } else if (url.startsWith("https") && play.yt_validate(url) === "video") {
         const songInfo = await play.video_info(url);
@@ -94,7 +97,9 @@ export const executeAddSong = async (
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setDescription("The requested song could not be added / found")
+          .setDescription(
+            "The requested song could not be added / found. Make sure the URL is valid!"
+          )
           .setColor("DarkRed"),
       ],
     });

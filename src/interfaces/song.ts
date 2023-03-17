@@ -44,10 +44,6 @@ export class SongQueue {
   }
 
   public pop() {
-    if (this.isEmpty()) {
-      return undefined;
-    }
-
     if (!(this.isLooping && this.current)) {
       this.current = this.queue.shift();
     }

@@ -88,16 +88,16 @@ export const executePlaySong = async (
 
     const voiceChannel = member.voice.channel;
 
-    if (
-      member.guild.channels.cache.some(
-        (channel) =>
-          channel.type === ChannelType.GuildVoice &&
-          channel.members.has(client.user.id)
-      )
-    ) {
-      await executeAddSong(urlArg, songQueue, sendReplyFunction);
-      return;
-    }
+    // if (
+    //   member.guild.channels.cache.some(
+    //     (channel) =>
+    //       channel.type === ChannelType.GuildVoice &&
+    //       channel.members.has(client.user.id)
+    //   )
+    // ) {
+    //   await executeAddSong(urlArg, songQueue, sendReplyFunction);
+    //   return;
+    // }
 
     if (!voiceChannel) {
       sendReplyFunction({
@@ -138,66 +138,57 @@ export const executePlaySong = async (
     connection.subscribe(audioPlayer);
 
     if (urlArg) {
-      // additional url was given
-      const song = await addSong(urlArg, songQueue);
-      await sendReplyFunction({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle(song.title)
-            .setURL(song.url)
-            .setDescription(
-              "Added " + song.title + " to the queue: #" + songQueue.length()
-            )
-            .setThumbnail(song.thumbnail_url)
-            .setColor("DarkGreen"),
-        ],
-      });
+      await executeAddSong(urlArg, songQueue, sendReplyFunction);
     }
 
-    playSong(
-      connection,
-      audioPlayer,
-      songQueue,
-      songQueue.pop(),
-      (song, remaining) => {
-        sendReplyFunction({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Playing " + song.title)
-              .setURL(song.url)
-              .setDescription(
-                "There are " + remaining + " other songs remaining in the queue"
-              )
-              .setThumbnail(song.thumbnail_url)
-              .setColor("DarkGreen"),
-          ],
-        });
-      },
-      () => {
-        sendReplyFunction({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Something went wrong")
-              .setDescription(
-                "Could not play the requested song.. Moving on to the next song in queue"
-              )
-              .setColor("DarkRed"),
-          ],
-        });
-      },
-      () => {
-        sendReplyFunction({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("I finished my job")
-              .setDescription(
-                "There are no songs remaining in the queue. Feel free to request me again with new songs"
-              )
-              .setColor("DarkGreen"),
-          ],
-        });
-      }
-    );
+    if (!songQueue.getCurrent()) {
+      playSong(
+        connection,
+        audioPlayer,
+        songQueue,
+        songQueue.pop(),
+        (song, remaining) => {
+          sendReplyFunction({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("Playing " + song.title)
+                .setURL(song.url)
+                .setDescription(
+                  "There are " +
+                    remaining +
+                    " other songs remaining in the queue"
+                )
+                .setThumbnail(song.thumbnail_url)
+                .setColor("DarkGreen"),
+            ],
+          });
+        },
+        () => {
+          sendReplyFunction({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("Something went wrong")
+                .setDescription(
+                  "Could not play the requested song.. Moving on to the next song in queue"
+                )
+                .setColor("DarkRed"),
+            ],
+          });
+        },
+        () => {
+          sendReplyFunction({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("I finished my job")
+                .setDescription(
+                  "There are no songs remaining in the queue. Feel free to request me again with new songs"
+                )
+                .setColor("DarkGreen"),
+            ],
+          });
+        }
+      );
+    }
   } catch (error) {
     console.log(error);
     sendReplyFunction({
