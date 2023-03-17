@@ -29,7 +29,7 @@ export const RemoveSongCommand: Command = {
     executeRemoveSong(
       interaction.member as GuildMember,
       songQueue,
-      interaction.options.get("number")?.value as string,
+      interaction.options.get("number")?.value?.toString()?.trim(),
       async (options: InteractionReplyOptions) => {
         return await sendInteractionReply(interaction, options);
       }

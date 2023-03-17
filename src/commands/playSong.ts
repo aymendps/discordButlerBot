@@ -30,7 +30,7 @@ export const PlaySongCommand: Command = {
     executePlaySong(
       client,
       interaction.member as GuildMember,
-      interaction.options.get("url")?.value as string,
+      interaction.options.get("url")?.value?.toString()?.trim(),
       songQueue,
       audioPlayer,
       async (options: InteractionReplyOptions) => {

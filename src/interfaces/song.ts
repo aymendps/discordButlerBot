@@ -2,6 +2,7 @@ export interface Song {
   title: string;
   url: string;
   thumbnail_url: string;
+  seek?: number;
 }
 
 export class SongQueue {

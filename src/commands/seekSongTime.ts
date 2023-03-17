@@ -31,7 +31,7 @@ export const SeekSongTimeCommand: Command = {
   ) => {
     executeSeekSongTime(
       interaction.member as GuildMember,
-      interaction.options.get("timestamp")?.value as string,
+      interaction.options.get("timestamp")?.value?.toString()?.trim(),
       songQueue,
       audioPlayer,
       async (options: InteractionReplyOptions) => {
