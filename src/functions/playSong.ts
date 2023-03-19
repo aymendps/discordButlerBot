@@ -7,7 +7,7 @@ import {
   AudioPlayerStatus,
 } from "@discordjs/voice";
 import { Song, SongQueue } from "../interfaces/song";
-import { addSong, executeAddSong } from "./addSong";
+import { executeAddSong } from "./addSong";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
 
@@ -29,7 +29,9 @@ export const playSong = async (
       return;
     }
 
-    const stream = await play.stream(currentSong.url);
+    const seek = Number(currentSong.seek || 0);
+
+    const stream = await play.stream(currentSong.url, { seek: seek });
 
     const audioResource = createAudioResource(stream.stream, {
       inputType: stream.type,
@@ -51,15 +53,33 @@ export const playSong = async (
     });
 
     audioPlayer.on("error", (error) => {
-      console.log(error);
-      errorReply();
+      if (
+        error.message.includes("Failed to find nearest Block") &&
+        currentSong.seek
+      ) {
+        console.log(
+          `Couldn't find nearest block with seek: ${currentSong.seek}. Trying with next seek!`
+        );
+        currentSong.seek++;
+        playSong(
+          connection,
+          audioPlayer,
+          songQueue,
+          currentSong,
+          successReply,
+          errorReply,
+          finishReply
+        );
+      } else {
+        console.log(error);
+        errorReply();
+      }
     });
 
     audioPlayer.play(audioResource);
-
     successReply(currentSong, songQueue.length());
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
@@ -87,17 +107,6 @@ export const executePlaySong = async (
     }
 
     const voiceChannel = member.voice.channel;
-
-    // if (
-    //   member.guild.channels.cache.some(
-    //     (channel) =>
-    //       channel.type === ChannelType.GuildVoice &&
-    //       channel.members.has(client.user.id)
-    //   )
-    // ) {
-    //   await executeAddSong(urlArg, songQueue, sendReplyFunction);
-    //   return;
-    // }
 
     if (!voiceChannel) {
       sendReplyFunction({
@@ -191,13 +200,26 @@ export const executePlaySong = async (
     }
   } catch (error) {
     console.log(error);
-    sendReplyFunction({
-      embeds: [
-        new EmbedBuilder()
-          .setTitle("Something went wrong")
-          .setDescription("Could not add or play the request song...")
-          .setColor("DarkRed"),
-      ],
-    });
+    if (error.message?.includes("Seeking beyond limit")) {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Seeking Beyond Limit!")
+            .setDescription(
+              "Make sure your timestamp does not exceed the length of the song!"
+            )
+            .setColor("DarkRed"),
+        ],
+      });
+    } else {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Something went wrong")
+            .setDescription("Could not add or play the request song...")
+            .setColor("DarkRed"),
+        ],
+      });
+    }
   }
 };

@@ -3,6 +3,20 @@ import { Song, SongQueue } from "../interfaces/song";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
 
+const checkForTimeStamp = (url: string, songDuration: number) => {
+  const index = url.indexOf("t=");
+
+  if (index === -1) return Number(0);
+
+  const seconds = Number(url.substring(index, url.length).replace(/\D/g, ""));
+
+  if (seconds > Number(songDuration)) {
+    return Number(0);
+  }
+
+  return seconds;
+};
+
 export const addSong = async (
   url: string,
   songQueue: SongQueue
@@ -39,6 +53,7 @@ export const addSong = async (
           title: songInfo.video_details.title,
           url: songInfo.video_details.url,
           thumbnail_url: songInfo.video_details.thumbnails[0].url,
+          seek: checkForTimeStamp(url, songInfo.video_details.durationInSec),
         };
 
         songQueue.push(song);

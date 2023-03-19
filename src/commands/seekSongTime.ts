@@ -7,7 +7,6 @@ import {
   ApplicationCommandOptionType,
 } from "discord.js";
 import { sendInteractionReply } from ".";
-import { executeRemoveSong } from "../functions/removeSong";
 import { executeSeekSongTime } from "../functions/seekSongTime";
 import { Command } from "../interfaces/command";
 import { SongQueue } from "../interfaces/song";

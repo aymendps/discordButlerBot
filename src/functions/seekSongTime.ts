@@ -1,7 +1,7 @@
 import { AudioPlayer, createAudioResource } from "@discordjs/voice";
 import { EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
-import { SongQueue } from "../interfaces/song";
+import { Song, SongQueue } from "../interfaces/song";
 import play, { YouTubeStream } from "play-dl";
 
 const TIMESTAMP_REGEX = /(?:([0-5][0-9]):)?([0-5][0-9]):([0-5][0-9])/;
@@ -81,9 +81,9 @@ export const executeSeekSongTime = async (
 
     const current = songQueue.getCurrent();
 
-    const stream = await play.stream(current.url, {
-      seek: seconds,
-    });
+    current.seek = seconds;
+
+    const stream = await play.stream(current.url, { seek: current.seek });
 
     const audioResource = createAudioResource(stream.stream, {
       inputType: stream.type,
@@ -103,7 +103,6 @@ export const executeSeekSongTime = async (
     });
   } catch (error) {
     console.log(error);
-
     if (error.message?.includes("Seeking beyond limit")) {
       sendReplyFunction({
         embeds: [
@@ -115,7 +114,6 @@ export const executeSeekSongTime = async (
             .setColor("DarkRed"),
         ],
       });
-      return;
     } else {
       sendReplyFunction({
         embeds: [
@@ -127,7 +125,6 @@ export const executeSeekSongTime = async (
             .setColor("DarkRed"),
         ],
       });
-      return;
     }
   }
 };
