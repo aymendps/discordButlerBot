@@ -4,7 +4,7 @@ import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { SongQueue } from "../interfaces/song";
 
 export const skipSong = (audioPlayer: AudioPlayer) => {
-  const status = audioPlayer.stop(true);
+  const status = audioPlayer.stop();
   return status;
 };
 
