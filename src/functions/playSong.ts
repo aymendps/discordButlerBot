@@ -101,7 +101,7 @@ export const playSong = async (
     audioPlayer.play(audioResource);
     if (allowReply) successReply(currentSong, songQueue.length());
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
