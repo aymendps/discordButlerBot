@@ -32,7 +32,17 @@ export const playSong = async (
 
     const seek = Number(currentSong.seek || 0);
 
-    const stream = await play.stream(currentSong.url, { seek: seek });
+    let toPlay = currentSong.url;
+
+    if (currentSong.url.includes("spotify")) {
+      const searchForAlternative = await play.search(currentSong.title, {
+        limit: 1,
+      });
+      toPlay = searchForAlternative[0].url;
+      console.log("using alternative url: " + toPlay);
+    }
+
+    const stream = await play.stream(toPlay, { seek: seek });
 
     const audioResource = createAudioResource(stream.stream, {
       inputType: stream.type,

@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { Song, SongQueue } from "../interfaces/song";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
-import play from "play-dl";
+import play, { SpotifyAlbum, SpotifyPlaylist, SpotifyTrack } from "play-dl";
 
 const checkForTimeStamp = (url: string, songDuration: number) => {
   const index = url.indexOf("t=");
@@ -23,8 +23,9 @@ export const addSong = async (
 ): Promise<Song> => {
   try {
     if (url) {
+      console.log("requested song: " + url);
+
       if (url.startsWith("https") && play.yt_validate(url) === "playlist") {
-        console.log(url);
         const playlist = await play.playlist_info(url);
         const videos = await playlist.all_videos();
 
@@ -58,6 +59,74 @@ export const addSong = async (
 
         songQueue.push(song);
         return song;
+      } else if (url.startsWith("https") && url.includes("spotify")) {
+        if (play.is_expired()) {
+          await play.refreshToken();
+        }
+
+        const songInfo = await play.spotify(url);
+
+        if (songInfo.type === "track") {
+          const track = songInfo as SpotifyTrack;
+          const song: Song = {
+            title: track.name,
+            url: track.url,
+            thumbnail_url: track.thumbnail.url,
+          };
+
+          songQueue.push(song);
+          return {
+            title: `Track - ${track.name}`,
+            url: track.url,
+            thumbnail_url: track.thumbnail.url,
+          };
+        } else if (songInfo.type === "album") {
+          const album = songInfo as SpotifyAlbum;
+          const albumTracks = await album.all_tracks();
+
+          const songs: Song[] = albumTracks.map((t) => {
+            return {
+              title: t.name,
+              url: t.url,
+              thumbnail_url: t.thumbnail
+                ? t.thumbnail.url
+                : album.thumbnail.url,
+            };
+          });
+
+          console.log(songs);
+
+          songs.forEach((song) => {
+            songQueue.push(song);
+          });
+          return {
+            title: `Album - ${album.name} - ${songs.length} Tracks`,
+            url: album.url,
+            thumbnail_url: album.thumbnail.url,
+          };
+        } else if (songInfo.type === "playlist") {
+          const playlist = songInfo as SpotifyPlaylist;
+          const playlistTracks = await playlist.all_tracks();
+
+          const songs: Song[] = playlistTracks.map((t) => {
+            return {
+              title: t.name,
+              url: t.url,
+              thumbnail_url: t.thumbnail
+                ? t.thumbnail.url
+                : playlist.thumbnail.url,
+            };
+          });
+
+          songs.forEach((song) => {
+            songQueue.push(song);
+          });
+          return {
+            title: `Playlist - ${playlist.name} - ${songs.length} Tracks`,
+            url: playlist.url,
+            thumbnail_url: playlist.thumbnail.url,
+          };
+        }
       } else {
         const songInfo = await play.search(url, { limit: 1 });
 

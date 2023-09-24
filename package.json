@@ -12,7 +12,7 @@
     "ffmpeg": "^0.0.4",
     "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
-    "play-dl": "^1.9.6",
+    "play-dl": "github:aymendps/play-dl",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
