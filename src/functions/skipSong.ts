@@ -2,6 +2,7 @@ import { AudioPlayer } from "@discordjs/voice";
 import { ChannelType, Client, EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { SongQueue } from "../interfaces/song";
+import { executeStopSong } from "./stopSong";
 
 export const skipSong = (audioPlayer: AudioPlayer) => {
   const status = audioPlayer.stop();
@@ -35,16 +36,13 @@ export const executeSkipSong = async (
     }
 
     if (songQueue.isEmpty()) {
-      sendReplyFunction({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle("The queue is already empty!")
-            .setDescription(
-              "There is no song that I could skip, " + member.nickname
-            )
-            .setColor("DarkGold"),
-        ],
-      });
+      executeStopSong(
+        client,
+        member,
+        songQueue,
+        audioPlayer,
+        sendReplyFunction
+      );
       return;
     }
 

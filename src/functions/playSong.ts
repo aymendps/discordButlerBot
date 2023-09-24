@@ -1,4 +1,11 @@
-import { EmbedBuilder, ChannelType, GuildMember, Client } from "discord.js";
+import {
+  EmbedBuilder,
+  GuildMember,
+  Client,
+  ButtonBuilder,
+  ButtonStyle,
+  ActionRowBuilder,
+} from "discord.js";
 import {
   joinVoiceChannel,
   VoiceConnection,
@@ -10,6 +17,7 @@ import { Song, SongQueue } from "../interfaces/song";
 import { executeAddSong } from "./addSong";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
+import { executeSkipSong } from "./skipSong";
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -188,8 +196,8 @@ export const executePlaySong = async (
         audioPlayer,
         songQueue,
         songQueue.pop(),
-        (song, remaining) => {
-          sendReplyFunction({
+        async (song, remaining) => {
+          const response = await sendReplyFunction({
             embeds: [
               new EmbedBuilder()
                 .setTitle("Playing " + song.title)
@@ -202,7 +210,88 @@ export const executePlaySong = async (
                 .setThumbnail(song.thumbnail_url)
                 .setColor("DarkGreen"),
             ],
+            components: [
+              new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                  .setLabel("Open")
+                  .setURL(song.url)
+                  .setStyle(ButtonStyle.Link),
+                new ButtonBuilder()
+                  .setCustomId("skip")
+                  .setLabel("Skip")
+                  .setStyle(ButtonStyle.Danger)
+              ),
+            ],
           });
+          try {
+            const confirmation = await response.awaitMessageComponent({
+              time: song.duration * 1000,
+            });
+            if (confirmation.customId === "skip") {
+              await confirmation.update({
+                embeds: [
+                  new EmbedBuilder()
+                    .setTitle("Playing " + song.title)
+                    .setURL(song.url)
+                    .setDescription(
+                      "There are " +
+                        remaining +
+                        " other songs remaining in the queue"
+                    )
+                    .setThumbnail(song.thumbnail_url)
+                    .setColor("DarkGreen"),
+                ],
+                components: [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Open")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skipped")
+                      .setLabel("Skipped!")
+                      .setStyle(ButtonStyle.Danger)
+                      .setDisabled(true)
+                  ),
+                ],
+              });
+              await executeSkipSong(
+                client,
+                member,
+                songQueue,
+                audioPlayer,
+                sendReplyFunction
+              );
+            }
+          } catch (error) {
+            response.edit({
+              embeds: [
+                new EmbedBuilder()
+                  .setTitle("Playing " + song.title)
+                  .setURL(song.url)
+                  .setDescription(
+                    "There are " +
+                      remaining +
+                      " other songs remaining in the queue"
+                  )
+                  .setThumbnail(song.thumbnail_url)
+                  .setColor("DarkGreen"),
+              ],
+              components: [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(
+                  new ButtonBuilder()
+                    .setLabel("Open")
+                    .setURL(song.url)
+                    .setStyle(ButtonStyle.Link),
+                  new ButtonBuilder()
+                    .setCustomId("finished")
+                    .setLabel("Finished!")
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(true)
+                ),
+              ],
+            });
+          }
         },
         () => {
           sendReplyFunction({

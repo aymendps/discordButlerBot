@@ -34,6 +34,7 @@ export const addSong = async (
             title: v.title,
             url: v.url,
             thumbnail_url: v.thumbnails[0].url,
+            duration: v.durationInSec,
           };
         });
         songs.forEach((song) => {
@@ -46,6 +47,7 @@ export const addSong = async (
           thumbnail_url: playlist.thumbnail
             ? playlist.thumbnail.url
             : songs[0].thumbnail_url,
+          duration: songs[0].duration,
         };
       } else if (url.startsWith("https") && play.yt_validate(url) === "video") {
         const songInfo = await play.video_info(url);
@@ -54,6 +56,7 @@ export const addSong = async (
           title: songInfo.video_details.title,
           url: songInfo.video_details.url,
           thumbnail_url: songInfo.video_details.thumbnails[0].url,
+          duration: songInfo.video_details.durationInSec,
           seek: checkForTimeStamp(url, songInfo.video_details.durationInSec),
         };
 
@@ -72,6 +75,7 @@ export const addSong = async (
             title: track.name,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
+            duration: track.durationInSec,
           };
 
           songQueue.push(song);
@@ -79,6 +83,7 @@ export const addSong = async (
             title: `Track - ${track.name}`,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
+            duration: track.durationInSec,
           };
         } else if (songInfo.type === "album") {
           const album = songInfo as SpotifyAlbum;
@@ -91,6 +96,7 @@ export const addSong = async (
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
                 : album.thumbnail.url,
+              duration: t.durationInSec,
             };
           });
 
@@ -103,6 +109,7 @@ export const addSong = async (
             title: `Album - ${album.name} - ${songs.length} Tracks`,
             url: album.url,
             thumbnail_url: album.thumbnail.url,
+            duration: songs[0].duration,
           };
         } else if (songInfo.type === "playlist") {
           const playlist = songInfo as SpotifyPlaylist;
@@ -115,6 +122,7 @@ export const addSong = async (
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
                 : playlist.thumbnail.url,
+              duration: t.durationInSec,
             };
           });
 
@@ -125,6 +133,7 @@ export const addSong = async (
             title: `Playlist - ${playlist.name} - ${songs.length} Tracks`,
             url: playlist.url,
             thumbnail_url: playlist.thumbnail.url,
+            duration: songs[0].duration,
           };
         }
       } else {
@@ -134,6 +143,7 @@ export const addSong = async (
           title: songInfo[0].title,
           url: songInfo[0].url,
           thumbnail_url: songInfo[0].thumbnails[0].url,
+          duration: songInfo[0].durationInSec,
         };
 
         songQueue.push(song);
