@@ -50,18 +50,32 @@ export const addSong = async (
           duration: songs[0].duration,
         };
       } else if (url.startsWith("https") && play.yt_validate(url) === "video") {
-        const songInfo = await play.video_info(url);
+        try {
+          const songInfo = await play.video_info(url);
 
-        const song: Song = {
-          title: songInfo.video_details.title,
-          url: songInfo.video_details.url,
-          thumbnail_url: songInfo.video_details.thumbnails[0].url,
-          duration: songInfo.video_details.durationInSec,
-          seek: checkForTimeStamp(url, songInfo.video_details.durationInSec),
-        };
+          const song: Song = {
+            title: songInfo.video_details.title,
+            url: songInfo.video_details.url,
+            thumbnail_url: songInfo.video_details.thumbnails[0].url,
+            duration: songInfo.video_details.durationInSec,
+            seek: checkForTimeStamp(url, songInfo.video_details.durationInSec),
+          };
 
-        songQueue.push(song);
-        return song;
+          songQueue.push(song);
+          return song;
+        } catch (error) {
+          const songInfo = await play.search(url, { limit: 1 });
+
+          const song: Song = {
+            title: songInfo[0].title,
+            url: songInfo[0].url,
+            thumbnail_url: songInfo[0].thumbnails[0].url,
+            duration: songInfo[0].durationInSec,
+          };
+
+          songQueue.push(song);
+          return song;
+        }
       } else if (url.startsWith("https") && url.includes("spotify")) {
         if (play.is_expired()) {
           await play.refreshToken();
@@ -72,7 +86,7 @@ export const addSong = async (
         if (songInfo.type === "track") {
           const track = songInfo as SpotifyTrack;
           const song: Song = {
-            title: track.name,
+            title: track.artists[0].name + " | " + track.name,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
@@ -80,7 +94,7 @@ export const addSong = async (
 
           songQueue.push(song);
           return {
-            title: `Track - ${track.name}`,
+            title: `Track - ${track.artists[0].name + " | " + track.name}`,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
@@ -91,7 +105,7 @@ export const addSong = async (
 
           const songs: Song[] = albumTracks.map((t) => {
             return {
-              title: t.name,
+              title: t.artists[0].name + " | " + t.name,
               url: t.url,
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
@@ -99,8 +113,6 @@ export const addSong = async (
               duration: t.durationInSec,
             };
           });
-
-          console.log(songs);
 
           songs.forEach((song) => {
             songQueue.push(song);
@@ -117,7 +129,7 @@ export const addSong = async (
 
           const songs: Song[] = playlistTracks.map((t) => {
             return {
-              title: t.name,
+              title: t.artists[0].name + " | " + t.name,
               url: t.url,
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
