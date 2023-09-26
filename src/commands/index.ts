@@ -15,6 +15,7 @@ import { SkipSongCommand } from "./skipSong";
 import { StopSongCommand } from "./stopSong";
 import { RemoveSongCommand } from "./removeSong";
 import { SeekSongTimeCommand } from "./seekSongTime";
+import { AddToFavoritesCommand } from "./addToFavorites";
 
 export const sendInteractionReply = async (
   interaction: CommandInteraction,
@@ -37,6 +38,7 @@ export const Commands: Command[] = [
   LoopSongCommand,
   RemoveSongCommand,
   SeekSongTimeCommand,
+  AddToFavoritesCommand,
   FindLolPlayerCommand,
   findActiveLolMatchCommand,
 ];

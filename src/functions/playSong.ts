@@ -18,6 +18,7 @@ import { executeAddSong } from "./addSong";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
 import { executeSkipSong } from "./skipSong";
+import { executeAddSpecificToFavorites } from "./addToFavorites";
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -219,18 +220,23 @@ export const executePlaySong = async (
                 new ButtonBuilder()
                   .setCustomId("skip")
                   .setLabel("Skip")
-                  .setStyle(ButtonStyle.Danger)
+                  .setStyle(ButtonStyle.Danger),
+                new ButtonBuilder()
+                  .setCustomId("add-fave")
+                  .setLabel("Add to Faves")
+                  .setStyle(ButtonStyle.Primary)
               ),
             ],
           });
-          try {
-            const songTitle = song.title;
-            const confirmation = await response.awaitMessageComponent({
-              time: song.duration * 1000,
-            });
+
+          const collector = response.createMessageComponentCollector({
+            time: song.duration * 1000,
+          });
+          collector.on("collect", async (confirmation) => {
             if (confirmation.customId === "skip") {
-              if (songTitle !== songQueue.getCurrent().title) {
-                throw "Song was already skipped!";
+              if (song.title !== songQueue.getCurrent()?.title) {
+                collector.stop();
+                return;
               }
               await confirmation.update({
                 embeds: [
@@ -266,8 +272,46 @@ export const executePlaySong = async (
                 audioPlayer,
                 sendReplyFunction
               );
+            } else if (confirmation.customId === "add-fave") {
+              confirmation.update({
+                embeds: [
+                  new EmbedBuilder()
+                    .setTitle("Playing " + song.title)
+                    .setURL(song.url)
+                    .setDescription(
+                      "There are " +
+                        remaining +
+                        " other songs remaining in the queue"
+                    )
+                    .setThumbnail(song.thumbnail_url)
+                    .setColor("DarkGreen"),
+                ],
+                components: [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Open")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skip")
+                      .setLabel("Skip")
+                      .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                      .setCustomId("add-fave")
+                      .setLabel("Add to Faves")
+                      .setStyle(ButtonStyle.Primary)
+                  ),
+                ],
+              });
+              await executeAddSpecificToFavorites(
+                client,
+                confirmation.member as GuildMember,
+                song,
+                sendReplyFunction
+              );
             }
-          } catch (error) {
+          });
+          collector.once("end", async () => {
             response.edit({
               embeds: [
                 new EmbedBuilder()
@@ -295,7 +339,7 @@ export const executePlaySong = async (
                 ),
               ],
             });
-          }
+          });
         },
         () => {
           sendReplyFunction({
