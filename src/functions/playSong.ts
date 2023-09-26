@@ -224,10 +224,14 @@ export const executePlaySong = async (
             ],
           });
           try {
+            const songTitle = song.title;
             const confirmation = await response.awaitMessageComponent({
               time: song.duration * 1000,
             });
             if (confirmation.customId === "skip") {
+              if (songTitle !== songQueue.getCurrent().title) {
+                throw "Song was already skipped!";
+              }
               await confirmation.update({
                 embeds: [
                   new EmbedBuilder()
