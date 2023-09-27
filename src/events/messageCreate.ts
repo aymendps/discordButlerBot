@@ -12,6 +12,9 @@ import { executeStopSong } from "../functions/stopSong";
 import { executeRemoveSong } from "../functions/removeSong";
 import { SongQueue } from "../interfaces/song";
 import { executeSeekSongTime } from "../functions/seekSongTime";
+import { executeAddToFavorites } from "../functions/addToFavorites";
+import { executeViewFavorites } from "../functions/viewFavorites";
+import { executePlayFavorites } from "../functions/playFavorites";
 
 export default (
   client: Client,
@@ -19,14 +22,35 @@ export default (
   audioPlayer: AudioPlayer
 ) => {
   client.on("messageCreate", async (message: Message) => {
-    if (message.author.bot || !message.content.startsWith(PREFIX)) return;
-
     const sendReply = async (options: MessageCreateOptions) => {
       const channel = message.channel as TextChannel;
       return await channel.send(options);
     };
 
-    if (message.content.startsWith(PREFIX + "play")) {
+    if (
+      message.content.includes("good bot") &&
+      !message.content.startsWith(PREFIX)
+    ) {
+      sendReply({ content: ":heart:" });
+      return;
+    }
+
+    if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+
+    if (message.content.startsWith(PREFIX + "play-faves")) {
+      const args = message.content.substring(11).trim().split(/\s+/);
+      const memberTag = args.filter((a) => a.startsWith("<@"))[0];
+      const number = args.filter((a) => !a.startsWith("<@"))[0];
+      executePlayFavorites(
+        client,
+        message.member,
+        number,
+        memberTag,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
+    } else if (message.content.startsWith(PREFIX + "play")) {
       const args = message.content.substring(5).trim();
       executePlaySong(
         client,
@@ -44,6 +68,8 @@ export default (
         audioPlayer,
         sendReply
       );
+    } else if (message.content.startsWith(PREFIX + "add-fave")) {
+      executeAddToFavorites(client, message.member, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "add")) {
       const args = message.content.substring(4).trim();
       executeAddSong(args, songQueue, sendReply);
@@ -69,6 +95,8 @@ export default (
         audioPlayer,
         sendReply
       );
+    } else if (message.content.startsWith(PREFIX + "faves")) {
+      executeViewFavorites(client, message.member, sendReply);
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9).trim();
       executeFindLolPlayer(args, sendReply);
