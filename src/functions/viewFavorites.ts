@@ -7,11 +7,25 @@ import path = require("path");
 export const executeViewFavorites = async (
   client: Client,
   member: GuildMember,
+  memberTagArgs: string,
   sendReplyFunction: sendReplyFunction
 ) => {
   try {
+    let username = member.user.username;
+    let nickname = member.nickname;
+
+    if (memberTagArgs) {
+      const taggedMember = await member.guild.members.fetch(
+        memberTagArgs.slice(0, -1).substring(2)
+      );
+      if (taggedMember) {
+        username = taggedMember.user.username;
+        nickname = taggedMember.nickname;
+      }
+    }
+
     const file = fs.readFileSync(
-      path.join(__dirname, `../../.data/${member.user.username}.data`),
+      path.join(__dirname, `../../.data/${username}.data`),
       "utf-8"
     );
     const faves: Song[] = JSON.parse(file);
@@ -25,7 +39,7 @@ export const executeViewFavorites = async (
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle(`${member.nickname}'s faves:`)
+          .setTitle(`${nickname}'s faves:`)
           .addFields(fields)
           .setColor("DarkGreen"),
       ],
