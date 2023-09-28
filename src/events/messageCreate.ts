@@ -96,7 +96,8 @@ export default (
         sendReply
       );
     } else if (message.content.startsWith(PREFIX + "faves")) {
-      executeViewFavorites(client, message.member, sendReply);
+      const args = message.content.substring(6).trim();
+      executeViewFavorites(client, message.member, args, sendReply);
     } else if (message.content.startsWith(PREFIX + "summoner")) {
       const args = message.content.substring(9).trim();
       executeFindLolPlayer(args, sendReply);

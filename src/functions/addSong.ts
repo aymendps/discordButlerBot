@@ -35,6 +35,7 @@ export const addSong = async (
             url: v.url,
             thumbnail_url: v.thumbnails[0].url,
             duration: v.durationInSec,
+            seek: 0,
           };
         });
         songs.forEach((song) => {
@@ -48,6 +49,7 @@ export const addSong = async (
             ? playlist.thumbnail.url
             : songs[0].thumbnail_url,
           duration: songs[0].duration,
+          seek: 0,
         };
       } else if (url.startsWith("https") && play.yt_validate(url) === "video") {
         try {
@@ -71,6 +73,7 @@ export const addSong = async (
             url: songInfo[0].url,
             thumbnail_url: songInfo[0].thumbnails[0].url,
             duration: songInfo[0].durationInSec,
+            seek: 0,
           };
 
           songQueue.push(song);
@@ -90,6 +93,7 @@ export const addSong = async (
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
+            seek: 0,
           };
 
           songQueue.push(song);
@@ -98,6 +102,7 @@ export const addSong = async (
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
+            seek: 0,
           };
         } else if (songInfo.type === "album") {
           const album = songInfo as SpotifyAlbum;
@@ -111,6 +116,7 @@ export const addSong = async (
                 ? t.thumbnail.url
                 : album.thumbnail.url,
               duration: t.durationInSec,
+              seek: 0,
             };
           });
 
@@ -122,6 +128,7 @@ export const addSong = async (
             url: album.url,
             thumbnail_url: album.thumbnail.url,
             duration: songs[0].duration,
+            seek: 0,
           };
         } else if (songInfo.type === "playlist") {
           const playlist = songInfo as SpotifyPlaylist;
@@ -135,6 +142,7 @@ export const addSong = async (
                 ? t.thumbnail.url
                 : playlist.thumbnail.url,
               duration: t.durationInSec,
+              seek: 0,
             };
           });
 
@@ -146,6 +154,7 @@ export const addSong = async (
             url: playlist.url,
             thumbnail_url: playlist.thumbnail.url,
             duration: songs[0].duration,
+            seek: 0,
           };
         }
       } else {
@@ -156,6 +165,7 @@ export const addSong = async (
           url: songInfo[0].url,
           thumbnail_url: songInfo[0].thumbnails[0].url,
           duration: songInfo[0].durationInSec,
+          seek: 0,
         };
 
         songQueue.push(song);

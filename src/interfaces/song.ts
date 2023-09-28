@@ -3,13 +3,15 @@ export interface Song {
   url: string;
   thumbnail_url: string;
   duration: number;
-  seek?: number;
+  seek: number;
 }
 
 export class SongQueue {
   private queue: Song[];
   private current: Song;
   private isLooping: boolean;
+  public collector;
+  public justSeeked: boolean = false;
 
   public constructor() {
     this.queue = [];

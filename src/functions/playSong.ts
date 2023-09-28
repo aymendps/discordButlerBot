@@ -19,6 +19,7 @@ import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
 import { executeSkipSong } from "./skipSong";
 import { executeAddSpecificToFavorites } from "./addToFavorites";
+import { executeSeekSongTimeSecondsRaw } from "./seekSongTime";
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -58,8 +59,11 @@ export const playSong = async (
     });
 
     audioPlayer.on("stateChange", (oldState, newState) => {
-      console.log(newState.status);
       if (newState.status === AudioPlayerStatus.Idle) {
+        if (songQueue.justSeeked === true) {
+          audioResource.playbackDuration = 1;
+          songQueue.justSeeked = false;
+        }
         if (
           audioResource.playbackDuration < 500 &&
           audioResource.playbackDuration > 0
@@ -226,12 +230,36 @@ export const executePlaySong = async (
                   .setLabel("Add to Faves")
                   .setStyle(ButtonStyle.Primary)
               ),
+              new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                  .setCustomId("seek-back-30")
+                  .setLabel("< 30s")
+                  .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                  .setCustomId("seek-back-10")
+                  .setLabel("< 10s")
+                  .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                  .setCustomId("seek-ford-10")
+                  .setLabel("10s >")
+                  .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                  .setCustomId("seek-ford-30")
+                  .setLabel("30s >")
+                  .setStyle(ButtonStyle.Success)
+              ),
             ],
           });
 
           const collector = response.createMessageComponentCollector({
             time: song.duration * 1000,
           });
+
+          songQueue.collector = collector;
+
+          let startTime = new Date();
+          let endTime = new Date();
+
           collector.on("collect", async (confirmation) => {
             if (confirmation.customId === "skip") {
               if (song.title !== songQueue.getCurrent()?.title) {
@@ -301,6 +329,24 @@ export const executePlaySong = async (
                       .setLabel("Add to Faves")
                       .setStyle(ButtonStyle.Primary)
                   ),
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-30")
+                      .setLabel("< 30s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-10")
+                      .setLabel("< 10s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-10")
+                      .setLabel("10s >")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-30")
+                      .setLabel("30s >")
+                      .setStyle(ButtonStyle.Success)
+                  ),
                 ],
               });
               await executeAddSpecificToFavorites(
@@ -309,6 +355,138 @@ export const executePlaySong = async (
                 song,
                 sendReplyFunction
               );
+            } else if (confirmation.customId.includes("seek-back")) {
+              endTime = new Date();
+              var timeDiff = endTime.valueOf() - startTime.valueOf();
+              var timeDiffSeconds = Math.round(timeDiff / 1000);
+              var songCurrentTime = song.seek + timeDiffSeconds;
+              songCurrentTime -= confirmation.customId.includes("30") ? 30 : 10;
+              songCurrentTime = songCurrentTime < 0 ? 0 : songCurrentTime;
+              songCurrentTime =
+                songCurrentTime > song.duration
+                  ? song.duration - 1
+                  : songCurrentTime;
+              await executeSeekSongTimeSecondsRaw(
+                songCurrentTime,
+                songQueue,
+                audioPlayer,
+                sendReplyFunction
+              );
+              startTime = new Date();
+              confirmation.update({
+                embeds: [
+                  new EmbedBuilder()
+                    .setTitle("Playing " + song.title)
+                    .setURL(song.url)
+                    .setDescription(
+                      "There are " +
+                        remaining +
+                        " other songs remaining in the queue"
+                    )
+                    .setThumbnail(song.thumbnail_url)
+                    .setColor("DarkGreen"),
+                ],
+                components: [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Open")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skip")
+                      .setLabel("Skip")
+                      .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                      .setCustomId("add-fave")
+                      .setLabel("Add to Faves")
+                      .setStyle(ButtonStyle.Primary)
+                  ),
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-30")
+                      .setLabel("< 30s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-10")
+                      .setLabel("< 10s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-10")
+                      .setLabel("10s >")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-30")
+                      .setLabel("30s >")
+                      .setStyle(ButtonStyle.Success)
+                  ),
+                ],
+              });
+            } else if (confirmation.customId.includes("seek-ford")) {
+              endTime = new Date();
+              var timeDiff = endTime.valueOf() - startTime.valueOf();
+              var timeDiffSeconds = Math.round(timeDiff / 1000);
+              var songCurrentTime = song.seek + timeDiffSeconds;
+              songCurrentTime += confirmation.customId.includes("30") ? 30 : 10;
+              songCurrentTime = songCurrentTime < 0 ? 0 : songCurrentTime;
+              songCurrentTime =
+                songCurrentTime > song.duration
+                  ? song.duration - 1
+                  : songCurrentTime;
+              await executeSeekSongTimeSecondsRaw(
+                songCurrentTime,
+                songQueue,
+                audioPlayer,
+                sendReplyFunction
+              );
+              startTime = new Date();
+              confirmation.update({
+                embeds: [
+                  new EmbedBuilder()
+                    .setTitle("Playing " + song.title)
+                    .setURL(song.url)
+                    .setDescription(
+                      "There are " +
+                        remaining +
+                        " other songs remaining in the queue"
+                    )
+                    .setThumbnail(song.thumbnail_url)
+                    .setColor("DarkGreen"),
+                ],
+                components: [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Open")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skip")
+                      .setLabel("Skip")
+                      .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                      .setCustomId("add-fave")
+                      .setLabel("Add to Faves")
+                      .setStyle(ButtonStyle.Primary)
+                  ),
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-30")
+                      .setLabel("< 30s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-10")
+                      .setLabel("< 10s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-10")
+                      .setLabel("10s >")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-30")
+                      .setLabel("30s >")
+                      .setStyle(ButtonStyle.Success)
+                  ),
+                ],
+              });
             }
           });
           collector.once("end", async () => {

@@ -89,7 +89,11 @@ export const executeSeekSongTime = async (
       inputType: stream.type,
     });
 
+    songQueue.justSeeked = true;
+
     audioPlayer.play(audioResource);
+
+    songQueue.collector.resetTimer();
 
     sendReplyFunction({
       embeds: [
@@ -126,5 +130,48 @@ export const executeSeekSongTime = async (
         ],
       });
     }
+  }
+};
+
+export const executeSeekSongTimeSecondsRaw = async (
+  seconds: number,
+  songQueue: SongQueue,
+  audioPlayer: AudioPlayer,
+  sendReplyFunction: sendReplyFunction
+) => {
+  try {
+    if (!songQueue.getCurrent()) {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("No song is currently playing!")
+            .setDescription(
+              "You need to play a song first before seeking a timestamp"
+            )
+            .setColor("DarkRed"),
+        ],
+      });
+      return;
+    }
+
+    const current = songQueue.getCurrent();
+
+    current.seek = seconds;
+
+    console.log(current.seek);
+
+    const stream = await play.stream(current.url, { seek: current.seek });
+
+    const audioResource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+    });
+
+    songQueue.justSeeked = true;
+
+    audioPlayer.play(audioResource);
+
+    songQueue.collector.resetTimer();
+  } catch (error) {
+    console.log(error);
   }
 };
