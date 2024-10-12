@@ -106,8 +106,12 @@ export class SongQueue {
     }
   }
 
-  public reset() {
+  public removeAll() {
     this.queue.length = 0;
+  }
+
+  public reset() {
+    this.removeAll();
     this.current = undefined;
   }
 }

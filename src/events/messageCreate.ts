@@ -21,6 +21,7 @@ import {
 } from "../functions/searchSong";
 import { executeSuggestSong } from "../functions/suggestSong";
 import { executeViewQueue } from "../functions/viewQueue";
+import { executeRemoveQueue } from "../functions/removeQueue";
 
 export default (
   client: Client,
@@ -106,6 +107,8 @@ export default (
       );
     } else if (message.content.startsWith(PREFIX + "loop")) {
       executeLoopSong(songQueue, sendReply);
+    } else if (message.content.startsWith(PREFIX + "remove-all")) {
+      executeRemoveQueue(songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "remove")) {
       const args = message.content.substring(7).trim();
       executeRemoveSong(message.member, songQueue, args, sendReply);

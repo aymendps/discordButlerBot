@@ -6,17 +6,17 @@ import {
 import { sendInteractionReply } from ".";
 import { Command } from "../interfaces/command";
 import { SongQueue } from "../interfaces/song";
-import { executeViewQueue } from "../functions/viewQueue";
+import { executeRemoveQueue } from "../functions/removeQueue";
 
-export const ViewQueueCommand: Command = {
-  name: "queue",
-  description: "View the songs in the queue with their current order",
+export const RemoveQueueCommand: Command = {
+  name: "remove-all",
+  description: "Remove all songs from the queue",
   run: async (
     client: Client,
     interaction: CommandInteraction,
     songQueue: SongQueue
   ) => {
-    executeViewQueue(songQueue, async (options: InteractionReplyOptions) => {
+    executeRemoveQueue(songQueue, async (options: InteractionReplyOptions) => {
       return await sendInteractionReply(interaction, options);
     });
   },
