@@ -9,14 +9,14 @@ export interface Song {
 export class SongQueue {
   private queue: Song[];
   private current: Song;
-  private isLooping: boolean;
+  private isLooping: "None" | "One" | "All";
   public collector;
   public justSeeked: boolean = false;
 
   public constructor() {
     this.queue = [];
     this.current = undefined;
-    this.isLooping = false;
+    this.isLooping = "None";
   }
 
   public getCurrent() {
@@ -35,8 +35,18 @@ export class SongQueue {
     return this.queue.length === 0;
   }
 
-  public toggleLooping() {
-    this.isLooping = !this.isLooping;
+  public nextLoopingMode() {
+    switch (this.isLooping) {
+      case "None":
+        this.isLooping = "One";
+        break;
+      case "One":
+        this.isLooping = "All";
+        break;
+      case "All":
+        this.isLooping = "None";
+        break;
+    }
     return {
       isLooping: this.isLooping,
       loopedSong: this.current,
@@ -48,8 +58,27 @@ export class SongQueue {
   }
 
   public pop() {
-    if (!(this.isLooping && this.current)) {
+    // if (!(this.isLooping && this.current)) {
+    //   this.current = this.queue.shift();
+    // }
+
+    // return this.current;
+
+    if (this.isLooping === "None" || !this.current) {
       this.current = this.queue.shift();
+      return this.current;
+    }
+
+    if (this.isLooping === "One" && this.current) {
+      this.current.seek = 0;
+      return this.current;
+    }
+
+    if (this.isLooping === "All" && this.current) {
+      this.current.seek = 0;
+      this.queue.push(this.current);
+      this.current = this.queue.shift();
+      return this.current;
     }
 
     return this.current;
