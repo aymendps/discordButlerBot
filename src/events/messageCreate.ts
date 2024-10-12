@@ -15,6 +15,10 @@ import { executeSeekSongTime } from "../functions/seekSongTime";
 import { executeAddToFavorites } from "../functions/addToFavorites";
 import { executeViewFavorites } from "../functions/viewFavorites";
 import { executePlayFavorites } from "../functions/playFavorites";
+import {
+  executeSearchSong,
+  SEARCH_DEFAULT_NUMBER_OF_RESULTS,
+} from "../functions/searchSong";
 
 export default (
   client: Client,
@@ -60,6 +64,18 @@ export default (
         audioPlayer,
         sendReply
       );
+    } else if (message.content.startsWith(PREFIX + "search")) {
+      const args = message.content.substring(7).trim();
+      const [name, max] = args.split("max=");
+      var boundedMax = Number(max);
+      if (isNaN(boundedMax)) {
+        boundedMax = SEARCH_DEFAULT_NUMBER_OF_RESULTS;
+      } else {
+        boundedMax = boundedMax > 10 ? 10 : boundedMax;
+        boundedMax = boundedMax < 1 ? 1 : boundedMax;
+      }
+
+      executeSearchSong(name, boundedMax, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "skip")) {
       executeSkipSong(
         client,
