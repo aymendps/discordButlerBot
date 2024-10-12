@@ -13,12 +13,14 @@ import { SongQueue } from "../interfaces/song";
 export const RemoveSongCommand: Command = {
   name: "remove",
   description:
-    "Remove added songs from the queue - Removes the last one if no number is passed",
+    "Remove a song from the queue. If no number is provided, the last song will be removed.",
   options: [
     {
       name: "number",
-      description: "How many songs to remove from the queue",
+      description: "Number of the song in the queue",
       type: ApplicationCommandOptionType.Integer,
+      required: false,
+      minValue: 1,
     },
   ],
   run: async (

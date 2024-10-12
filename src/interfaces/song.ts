@@ -84,23 +84,19 @@ export class SongQueue {
     return this.current;
   }
 
-  public remove(howMany: number = 1) {
-    if (
-      howMany <= 0 ||
-      howMany === null ||
-      howMany === undefined ||
-      isNaN(howMany)
-    ) {
-      return 0;
-    }
+  public removeLast(): Song {
+    return this.queue.pop();
+  }
 
-    if (howMany > this.queue.length) {
-      var temp = this.queue.length;
-      this.queue.length = 0;
-      return temp;
+  public removeAt(index: number): Song {
+    if (index <= 0) {
+      return this.queue.shift();
+    } else if (index >= this.queue.length) {
+      return this.removeLast();
     } else {
-      this.queue.length -= howMany;
-      return howMany;
+      const temp = this.queue[index];
+      this.queue.splice(index, 1);
+      return temp;
     }
   }
 

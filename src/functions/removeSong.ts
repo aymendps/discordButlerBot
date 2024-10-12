@@ -1,19 +1,15 @@
 import { EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
-import { SongQueue } from "../interfaces/song";
+import { Song, SongQueue } from "../interfaces/song";
 
 export const executeRemoveSong = async (
   member: GuildMember,
   songQueue: SongQueue,
-  howMany: string,
+  songIndex: string,
   sendReplyFunction: sendReplyFunction
 ) => {
   try {
-    const removedSongs: number = howMany
-      ? songQueue.remove(parseInt(howMany))
-      : songQueue.remove();
-
-    if (removedSongs === 0) {
+    if (songQueue.isEmpty()) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -27,13 +23,22 @@ export const executeRemoveSong = async (
       return;
     }
 
-    await sendReplyFunction({
+    let removedSong: Song;
+
+    if (songIndex && !isNaN(parseInt(songIndex))) {
+      removedSong = songQueue.removeAt(parseInt(songIndex) - 1);
+    } else {
+      removedSong = songQueue.removeLast();
+    }
+
+    sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle(`Removed ${removedSongs} songs from the queue`)
+          .setTitle(`Removed ${removedSong.title} from the queue`)
           .setDescription(
             `There are ${songQueue.length()} other songs remaining in the queue`
           )
+          .setThumbnail(removedSong.thumbnail_url)
           .setColor("DarkBlue"),
       ],
     });
