@@ -20,6 +20,7 @@ import {
   SEARCH_DEFAULT_NUMBER_OF_RESULTS,
 } from "../functions/searchSong";
 import { executeSuggestSong } from "../functions/suggestSong";
+import { executeViewQueue } from "../functions/viewQueue";
 
 export default (
   client: Client,
@@ -65,6 +66,8 @@ export default (
         audioPlayer,
         sendReply
       );
+    } else if (message.content.startsWith(PREFIX + "queue")) {
+      executeViewQueue(songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "search")) {
       const args = message.content.substring(7).trim();
       const [name, max] = args.split("max=");

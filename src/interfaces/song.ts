@@ -27,12 +27,20 @@ export class SongQueue {
     return this.queue[0];
   }
 
+  public last() {
+    return this.queue[this.queue.length - 1];
+  }
+
   public length() {
     return this.queue.length;
   }
 
   public isEmpty() {
     return this.queue.length === 0;
+  }
+
+  public getAllSongs(): Song[] {
+    return this.queue;
   }
 
   public nextLoopingMode() {
@@ -58,14 +66,8 @@ export class SongQueue {
   }
 
   public pop() {
-    // if (!(this.isLooping && this.current)) {
-    //   this.current = this.queue.shift();
-    // }
-
-    // return this.current;
-
     if (this.isLooping === "None" || !this.current) {
-      this.current = this.queue.shift();
+      this.current = this.removeFront();
       return this.current;
     }
 
@@ -77,11 +79,15 @@ export class SongQueue {
     if (this.isLooping === "All" && this.current) {
       this.current.seek = 0;
       this.queue.push(this.current);
-      this.current = this.queue.shift();
+      this.current = this.removeFront();
       return this.current;
     }
 
     return this.current;
+  }
+
+  public removeFront(): Song {
+    return this.queue.shift();
   }
 
   public removeLast(): Song {
@@ -90,7 +96,7 @@ export class SongQueue {
 
   public removeAt(index: number): Song {
     if (index <= 0) {
-      return this.queue.shift();
+      return this.removeFront();
     } else if (index >= this.queue.length) {
       return this.removeLast();
     } else {
