@@ -20,6 +20,8 @@ import play from "play-dl";
 import { executeSkipSong } from "./skipSong";
 import { executeAddSpecificToFavorites } from "./addToFavorites";
 import { executeSeekSongTimeSecondsRaw } from "./seekSongTime";
+import { PassThrough } from "stream";
+import * as ffmpeg from "fluent-ffmpeg";
 
 export const playSong = async (
   connection: VoiceConnection,
@@ -54,45 +56,30 @@ export const playSong = async (
 
     const stream = await play.stream(toPlay, { seek: seek });
 
-    const audioResource = createAudioResource(stream.stream, {
-      inputType: stream.type,
-    });
+    const ffmpegStream = new PassThrough();
+    ffmpeg()
+      .input(stream.stream)
+      .noVideo()
+      .audioCodec("libopus")
+      .format("opus")
+      .audioChannels(2)
+      .setStartTime(Number(seek))
+      .setDuration(Number(currentSong.duration) - Number(seek))
+      .pipe(ffmpegStream);
+
+    const audioResource = createAudioResource(ffmpegStream);
 
     audioPlayer.on("stateChange", (oldState, newState) => {
       if (newState.status === AudioPlayerStatus.Idle) {
-        if (songQueue.justSeeked === true) {
-          audioResource.playbackDuration = 1;
-          songQueue.justSeeked = false;
-        }
-        if (
-          audioResource.playbackDuration < 500 &&
-          audioResource.playbackDuration > 0
-        ) {
-          console.log(
-            `Couldn't find nearest block with seek: ${currentSong.seek}. Trying with next seek!`
-          );
-          currentSong.seek++;
-          playSong(
-            connection,
-            audioPlayer,
-            songQueue,
-            currentSong,
-            successReply,
-            errorReply,
-            finishReply,
-            false
-          );
-        } else {
-          playSong(
-            connection,
-            audioPlayer,
-            songQueue,
-            songQueue.pop(),
-            successReply,
-            errorReply,
-            finishReply
-          );
-        }
+        playSong(
+          connection,
+          audioPlayer,
+          songQueue,
+          songQueue.pop(),
+          successReply,
+          errorReply,
+          finishReply
+        );
       }
     });
 
@@ -124,7 +111,7 @@ export const playSong = async (
     audioPlayer.play(audioResource);
     if (allowReply) successReply(currentSong, songQueue.length());
   } catch (error) {
-    throw error;
+    console.log(error);
   }
 };
 

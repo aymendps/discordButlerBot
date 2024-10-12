@@ -40,7 +40,7 @@ export const executeStopSong = async (
     });
 
     songQueue.reset();
-    skipSong(audioPlayer);
+    skipSong(audioPlayer, songQueue);
   } catch (error) {
     console.log(error);
   }

@@ -3,6 +3,8 @@ import { EmbedBuilder, GuildMember } from "discord.js";
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { Song, SongQueue } from "../interfaces/song";
 import play, { YouTubeStream } from "play-dl";
+import { PassThrough } from "stream";
+import * as ffmpeg from "fluent-ffmpeg";
 
 const TIMESTAMP_REGEX = /(?:([0-5][0-9]):)?([0-5][0-9]):([0-5][0-9])/;
 
@@ -85,9 +87,18 @@ export const executeSeekSongTime = async (
 
     const stream = await play.stream(current.url, { seek: current.seek });
 
-    const audioResource = createAudioResource(stream.stream, {
-      inputType: stream.type,
-    });
+    const ffmpegStream = new PassThrough();
+    ffmpeg()
+      .input(stream.stream)
+      .noVideo()
+      .audioCodec("libopus")
+      .format("opus")
+      .audioChannels(2)
+      .setStartTime(Number(current.seek))
+      .setDuration(Number(current.duration) - Number(current.seek))
+      .pipe(ffmpegStream);
+
+    const audioResource = createAudioResource(ffmpegStream);
 
     songQueue.justSeeked = true;
 
@@ -106,7 +117,6 @@ export const executeSeekSongTime = async (
       ],
     });
   } catch (error) {
-    console.log(error);
     if (error.message?.includes("Seeking beyond limit")) {
       sendReplyFunction({
         embeds: [
@@ -118,7 +128,17 @@ export const executeSeekSongTime = async (
             .setColor("DarkRed"),
         ],
       });
+    } else if (error.code === "ERR_SSL_WRONG_VERSION_NUMBER") {
+      console.log("Handling SSL Error");
+      executeSeekSongTime(
+        member,
+        timestamp,
+        songQueue,
+        audioPlayer,
+        sendReplyFunction
+      );
     } else {
+      console.log(error);
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -162,9 +182,18 @@ export const executeSeekSongTimeSecondsRaw = async (
 
     const stream = await play.stream(current.url, { seek: current.seek });
 
-    const audioResource = createAudioResource(stream.stream, {
-      inputType: stream.type,
-    });
+    const ffmpegStream = new PassThrough();
+    ffmpeg()
+      .input(stream.stream)
+      .noVideo()
+      .audioCodec("libopus")
+      .format("opus")
+      .audioChannels(2)
+      .setStartTime(Number(current.seek))
+      .setDuration(Number(current.duration) - Number(current.seek))
+      .pipe(ffmpegStream);
+
+    const audioResource = createAudioResource(ffmpegStream);
 
     songQueue.justSeeked = true;
 
@@ -172,6 +201,16 @@ export const executeSeekSongTimeSecondsRaw = async (
 
     songQueue.collector.resetTimer();
   } catch (error) {
-    console.log(error);
+    if (error.code === "ERR_SSL_WRONG_VERSION_NUMBER") {
+      console.log("Handling SSL Error");
+      executeSeekSongTimeSecondsRaw(
+        seconds,
+        songQueue,
+        audioPlayer,
+        sendReplyFunction
+      );
+    } else {
+      console.log(error);
+    }
   }
 };

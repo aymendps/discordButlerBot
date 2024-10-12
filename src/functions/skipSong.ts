@@ -4,8 +4,9 @@ import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import { SongQueue } from "../interfaces/song";
 import { executeStopSong } from "./stopSong";
 
-export const skipSong = (audioPlayer: AudioPlayer) => {
-  const status = audioPlayer.stop();
+export const skipSong = (audioPlayer: AudioPlayer, songQueue: SongQueue) => {
+  songQueue.justSeeked = false;
+  const status = audioPlayer.stop(true);
   return status;
 };
 
@@ -59,7 +60,7 @@ export const executeSkipSong = async (
       ],
     });
 
-    skipSong(audioPlayer);
+    skipSong(audioPlayer, songQueue);
   } catch (error) {
     console.log(error);
   }
