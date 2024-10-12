@@ -16,7 +16,7 @@ export const addToFavorites = async (
     );
     const faves: Song[] = JSON.parse(file);
     console.log(
-      `faves data was found for ${member.user.username}. Adding song to faves..`
+      `faves data was found for ${member.user.username}\nadding song to faves..`
     );
     if (faves.find((s) => s.url === song.url)) {
       console.log("song is already in faves!");
@@ -33,7 +33,7 @@ export const addToFavorites = async (
   } catch (error) {
     if (error.code === "ENOENT") {
       console.log(
-        `faves data does not exist for ${member.user.username}. Creating new data..`
+        `faves data does not exist for ${member.user.username}\ncreating new data..`
       );
       const faves: Song[] = [song];
       fs.writeFileSync(

@@ -22,6 +22,7 @@ import { SearchSongCommand } from "./searchSong";
 import { SuggestSongCommand } from "./suggestSong";
 import { ViewQueueCommand } from "./viewQueue";
 import { RemoveQueueCommand } from "./removeQueue";
+import { AddToPlaylistCommand } from "./addToPlaylist";
 
 export const sendInteractionReply = async (
   interaction: CommandInteraction,
@@ -51,6 +52,7 @@ export const Commands: Command[] = [
   AddToFavoritesCommand,
   ViewFavoritesCommand,
   PlayFavoritesCommand,
+  AddToPlaylistCommand,
   FindLolPlayerCommand,
   findActiveLolMatchCommand,
 ];
