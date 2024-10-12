@@ -77,6 +77,7 @@ export default (
       }
       executeSearchSong(name, boundedMax, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "suggest")) {
+      sendReply({ content: "Thinking..." });
       const args = message.content.substring(8).trim();
       executeSuggestSong(args, songQueue, sendReply);
     } else if (message.content.startsWith(PREFIX + "skip")) {
