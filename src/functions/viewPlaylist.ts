@@ -76,18 +76,52 @@ export const executeViewPlaylist = async (
       return;
     }
 
-    const songFields: APIEmbedField[] = playlist.map((song, index) => {
-      return {
-        name: `Song #${index + 1}:`,
-        value: `[${song.title}](${song.url})`,
+    let songFields: APIEmbedField[] = new Array<APIEmbedField>();
+
+    if (playlist.length > 20) {
+      const firstTenSongs = playlist.slice(0, 10);
+      const lastTenSongs = playlist.slice(-10);
+      songFields.push(
+        ...firstTenSongs.map((song, index) => {
+          return {
+            name: `Song #${index + 1}:`,
+            value: `[${song.title}](${song.url})`,
+            inline: false,
+          };
+        })
+      );
+      songFields.push({
+        name: "...",
+        value: "...",
         inline: false,
-      };
-    });
+      });
+      songFields.push(
+        ...lastTenSongs.map((song, index) => {
+          return {
+            name: `Song #${playlist.length - 10 + index + 1}:`,
+            value: `[${song.title}](${song.url})`,
+            inline: false,
+          };
+        })
+      );
+    } else {
+      songFields = playlist.map((song, index) => {
+        return {
+          name: `Song #${index + 1}:`,
+          value: `[${song.title}](${song.url})`,
+          inline: false,
+        };
+      });
+    }
 
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
-          .setTitle(`Playlist: ${sanitizePlaylistID(playlistID)}`)
+          .setTitle(
+            `Playlist: ${sanitizePlaylistID(playlistID)} - ${
+              playlist.length
+            } Songs`
+          )
           .setDescription("The songs are listed in order of play")
           .addFields(...songFields)
           .setColor("DarkBlue"),
