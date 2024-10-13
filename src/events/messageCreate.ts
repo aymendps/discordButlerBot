@@ -26,6 +26,7 @@ import { executeAddToPlaylist } from "../functions/addToPlaylist";
 import { executeViewPlaylist } from "../functions/viewPlaylist";
 import { executeViewPlaylistAll } from "../functions/viewPlaylistAll";
 import { executePlayPlaylist } from "../functions/playPlaylist";
+import { executePlaySongFromFile } from "../functions/playSongFromFile";
 
 const handleMemes = (message: Message, sendReply: Function) => {
   if (
@@ -93,6 +94,15 @@ export default (
         client,
         message.member,
         args,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
+    } else if (message.content.startsWith(PREFIX + "play-file")) {
+      executePlaySongFromFile(
+        client,
+        message.member,
+        message.attachments.first(),
         songQueue,
         audioPlayer,
         sendReply

@@ -19,7 +19,8 @@ const checkForTimeStamp = (url: string, songDuration: number) => {
 
 export const addSong = async (
   url: string,
-  songQueue: SongQueue
+  songQueue: SongQueue,
+  useThisRawSongInstead: Song = null
 ): Promise<Song> => {
   try {
     if (url) {
@@ -171,6 +172,9 @@ export const addSong = async (
         songQueue.push(song);
         return song;
       }
+    } else if (useThisRawSongInstead) {
+      songQueue.push(useThisRawSongInstead);
+      return useThisRawSongInstead;
     }
   } catch (error) {
     console.log(error);
@@ -181,9 +185,10 @@ export const addSong = async (
 export const executeAddSong = async (
   urlArgs: string,
   songQueue: SongQueue,
-  sendReplyFunction: sendReplyFunction
+  sendReplyFunction: sendReplyFunction,
+  useThisRawSongInstead: Song = null
 ) => {
-  if (!urlArgs) {
+  if (!urlArgs && !useThisRawSongInstead) {
     sendReplyFunction({
       embeds: [
         new EmbedBuilder()
@@ -194,7 +199,13 @@ export const executeAddSong = async (
     return;
   }
 
-  const song = await addSong(urlArgs, songQueue);
+  let song: Song;
+
+  if (urlArgs) {
+    song = await addSong(urlArgs, songQueue);
+  } else {
+    song = await addSong(null, songQueue, useThisRawSongInstead);
+  }
 
   if (song) {
     sendReplyFunction({

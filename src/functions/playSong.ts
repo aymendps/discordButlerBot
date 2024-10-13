@@ -54,18 +54,27 @@ export const playSong = async (
       console.log("using alternative url: " + toPlay);
     }
 
-    const stream = await play.stream(toPlay, { seek: seek });
-
     const ffmpegStream = new PassThrough();
-    ffmpeg()
-      .input(stream.stream)
-      .noVideo()
-      .audioCodec("libopus")
-      .format("opus")
-      .audioChannels(2)
-      .setStartTime(Number(seek))
-      .setDuration(Number(currentSong.duration) - Number(seek))
-      .pipe(ffmpegStream);
+
+    if (!currentSong.isFile) {
+      const stream = await play.stream(toPlay, { seek: seek });
+
+      ffmpeg()
+        .input(stream.stream)
+        .noVideo()
+        .audioCodec("libopus")
+        .format("opus")
+        .audioChannels(2)
+        .setStartTime(Number(seek))
+        .setDuration(Number(currentSong.duration) - Number(seek))
+        .pipe(ffmpegStream);
+    } else {
+      ffmpeg(toPlay)
+        .noVideo()
+        .format("mp3")
+        .audioChannels(2)
+        .pipe(ffmpegStream);
+    }
 
     const audioResource = createAudioResource(ffmpegStream);
 
@@ -121,10 +130,11 @@ export const executePlaySong = async (
   urlArg: string,
   songQueue: SongQueue,
   audioPlayer: AudioPlayer,
-  sendReplyFunction: sendReplyFunction
+  sendReplyFunction: sendReplyFunction,
+  useThisRawSongInstead: Song = null
 ) => {
   try {
-    if (songQueue.isEmpty() && !urlArg) {
+    if (songQueue.isEmpty() && !urlArg && !useThisRawSongInstead) {
       sendReplyFunction({
         embeds: [
           new EmbedBuilder()
@@ -180,6 +190,13 @@ export const executePlaySong = async (
 
     if (urlArg) {
       await executeAddSong(urlArg, songQueue, sendReplyFunction);
+    } else {
+      await executeAddSong(
+        null,
+        songQueue,
+        sendReplyFunction,
+        useThisRawSongInstead
+      );
     }
 
     if (!songQueue.getCurrent()) {
@@ -202,44 +219,57 @@ export const executePlaySong = async (
                 .setThumbnail(song.thumbnail_url)
                 .setColor("DarkGreen"),
             ],
-            components: [
-              new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder()
-                  .setLabel("Open")
-                  .setURL(song.url)
-                  .setStyle(ButtonStyle.Link),
-                new ButtonBuilder()
-                  .setCustomId("skip")
-                  .setLabel("Skip")
-                  .setStyle(ButtonStyle.Danger),
-                new ButtonBuilder()
-                  .setCustomId("add-fave")
-                  .setLabel("Add to Faves")
-                  .setStyle(ButtonStyle.Primary)
-              ),
-              new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder()
-                  .setCustomId("seek-back-30")
-                  .setLabel("< 30s")
-                  .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                  .setCustomId("seek-back-10")
-                  .setLabel("< 10s")
-                  .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                  .setCustomId("seek-ford-10")
-                  .setLabel("10s >")
-                  .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                  .setCustomId("seek-ford-30")
-                  .setLabel("30s >")
-                  .setStyle(ButtonStyle.Success)
-              ),
-            ],
+            components: !song.isFile
+              ? [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Open")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skip")
+                      .setLabel("Skip")
+                      .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                      .setCustomId("add-fave")
+                      .setLabel("Add to Faves")
+                      .setStyle(ButtonStyle.Primary)
+                  ),
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-30")
+                      .setLabel("< 30s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-back-10")
+                      .setLabel("< 10s")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-10")
+                      .setLabel("10s >")
+                      .setStyle(ButtonStyle.Success),
+                    new ButtonBuilder()
+                      .setCustomId("seek-ford-30")
+                      .setLabel("30s >")
+                      .setStyle(ButtonStyle.Success)
+                  ),
+                ]
+              : [
+                  new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                      .setLabel("Download")
+                      .setURL(song.url)
+                      .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                      .setCustomId("skip")
+                      .setLabel("Skip")
+                      .setStyle(ButtonStyle.Danger)
+                  ),
+                ],
           });
 
           const collector = response.createMessageComponentCollector({
-            time: song.duration * 1000,
+            time: song.duration ? song.duration * 1000 : 5 * 60000,
           });
 
           songQueue.collector = collector;

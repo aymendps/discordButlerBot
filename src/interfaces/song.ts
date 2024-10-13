@@ -4,6 +4,7 @@ export interface Song {
   thumbnail_url: string;
   duration: number;
   seek: number;
+  isFile?: boolean;
 }
 
 export class SongQueue {

@@ -77,11 +77,25 @@ export const executeSeekSongTime = async (
       return;
     }
 
+    const current = songQueue.getCurrent();
+
+    if (current.isFile) {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Cannot seek a file!")
+            .setDescription(
+              "You cannot seek a file. Please play a song from a URL to seek a timestamp!"
+            )
+            .setColor("DarkGold"),
+        ],
+      });
+      return;
+    }
+
     const matchedTimestamp = timestamp.match(TIMESTAMP_REGEX)[0];
 
     const seconds = convertTimeStampToSeconds(matchedTimestamp);
-
-    const current = songQueue.getCurrent();
 
     current.seek = seconds;
 
@@ -176,9 +190,21 @@ export const executeSeekSongTimeSecondsRaw = async (
 
     const current = songQueue.getCurrent();
 
-    current.seek = seconds;
+    if (current.isFile) {
+      sendReplyFunction({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Cannot seek a file!")
+            .setDescription(
+              "You cannot seek a file. Please play a song from a URL to seek a timestamp!"
+            )
+            .setColor("DarkGold"),
+        ],
+      });
+      return;
+    }
 
-    console.log(current.seek);
+    current.seek = seconds;
 
     const stream = await play.stream(current.url, { seek: current.seek });
 

@@ -26,6 +26,7 @@ import { AddToPlaylistCommand } from "./addToPlaylist";
 import { ViewPlaylistCommand } from "./viewPlaylist";
 import { ViewPlaylistAllCommand } from "./viewPlaylistAll";
 import { PlayPlaylistCommand } from "./playPlaylist";
+import { PlaySongFromFileCommand } from "./playSongFromFile";
 
 export const sendInteractionReply = async (
   interaction: CommandInteraction,
@@ -45,6 +46,7 @@ export const Commands: Command[] = [
   SuggestSongCommand,
   AddSongCommand,
   PlaySongCommand,
+  PlaySongFromFileCommand,
   SkipSongCommand,
   StopSongCommand,
   LoopSongCommand,
