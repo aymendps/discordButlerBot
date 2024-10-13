@@ -25,6 +25,7 @@ import { RemoveQueueCommand } from "./removeQueue";
 import { AddToPlaylistCommand } from "./addToPlaylist";
 import { ViewPlaylistCommand } from "./viewPlaylist";
 import { ViewPlaylistAllCommand } from "./viewPlaylistAll";
+import { PlayPlaylistCommand } from "./playPlaylist";
 
 export const sendInteractionReply = async (
   interaction: CommandInteraction,
@@ -55,6 +56,7 @@ export const Commands: Command[] = [
   ViewFavoritesCommand,
   PlayFavoritesCommand,
   AddToPlaylistCommand,
+  PlayPlaylistCommand,
   ViewPlaylistCommand,
   ViewPlaylistAllCommand,
   FindLolPlayerCommand,

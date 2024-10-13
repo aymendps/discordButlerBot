@@ -25,6 +25,7 @@ import { executeRemoveQueue } from "../functions/removeQueue";
 import { executeAddToPlaylist } from "../functions/addToPlaylist";
 import { executeViewPlaylist } from "../functions/viewPlaylist";
 import { executeViewPlaylistAll } from "../functions/viewPlaylistAll";
+import { executePlayPlaylist } from "../functions/playPlaylist";
 
 export default (
   client: Client,
@@ -74,6 +75,16 @@ export default (
     } else if (message.content.startsWith(PREFIX + "playlist-view")) {
       const args = message.content.substring(14).trim();
       executeViewPlaylist(args, sendReply);
+    } else if (message.content.startsWith(PREFIX + "playlist")) {
+      const args = message.content.substring(9).trim();
+      executePlayPlaylist(
+        client,
+        message.member,
+        args,
+        songQueue,
+        audioPlayer,
+        sendReply
+      );
     } else if (message.content.startsWith(PREFIX + "play")) {
       const args = message.content.substring(5).trim();
       executePlaySong(
