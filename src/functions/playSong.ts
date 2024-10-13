@@ -190,7 +190,7 @@ export const executePlaySong = async (
 
     if (urlArg) {
       await executeAddSong(urlArg, songQueue, sendReplyFunction);
-    } else {
+    } else if (useThisRawSongInstead) {
       await executeAddSong(
         null,
         songQueue,
