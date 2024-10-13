@@ -23,6 +23,7 @@ import { executeSuggestSong } from "../functions/suggestSong";
 import { executeViewQueue } from "../functions/viewQueue";
 import { executeRemoveQueue } from "../functions/removeQueue";
 import { executeAddToPlaylist } from "../functions/addToPlaylist";
+import { executeViewPlaylist } from "../functions/viewPlaylist";
 
 export default (
   client: Client,
@@ -67,6 +68,9 @@ export default (
       const playlistID = playlistMatch ? playlistMatch[1] : null;
       const songID = songMatch ? songMatch[1] : null;
       executeAddToPlaylist(playlistID, songID, songQueue, sendReply);
+    } else if (message.content.startsWith(PREFIX + "playlist-view")) {
+      const args = message.content.substring(14).trim();
+      executeViewPlaylist(args, sendReply);
     } else if (message.content.startsWith(PREFIX + "play")) {
       const args = message.content.substring(5).trim();
       executePlaySong(

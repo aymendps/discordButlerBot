@@ -4,15 +4,7 @@ import path = require("path");
 import { sendReplyFunction } from "../interfaces/sendReplyFunction";
 import play from "play-dl";
 import { EmbedBuilder } from "discord.js";
-
-function sanitizePlaylistID(str: string) {
-  return str
-    .toLowerCase()
-    .split(/[^a-zA-Z0-9]+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join("");
-}
+import { sanitizePlaylistID } from "./utils";
 
 const addToPlaylist = async (playlistID: string, song: Song) => {
   try {
