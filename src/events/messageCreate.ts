@@ -27,6 +27,24 @@ import { executeViewPlaylist } from "../functions/viewPlaylist";
 import { executeViewPlaylistAll } from "../functions/viewPlaylistAll";
 import { executePlayPlaylist } from "../functions/playPlaylist";
 
+const handleMemes = (message: Message, sendReply: Function) => {
+  if (
+    message.content.includes("good bot") &&
+    !message.content.startsWith(PREFIX)
+  ) {
+    sendReply({ content: ":heart:" });
+    return;
+  }
+
+  if (
+    message.content.toLowerCase().includes("baba") &&
+    !message.content.startsWith(PREFIX)
+  ) {
+    sendReply({ content: "boubou" });
+    return;
+  }
+};
+
 export default (
   client: Client,
   songQueue: SongQueue,
@@ -38,13 +56,7 @@ export default (
       return await channel.send(options);
     };
 
-    if (
-      message.content.includes("good bot") &&
-      !message.content.startsWith(PREFIX)
-    ) {
-      sendReply({ content: ":heart:" });
-      return;
-    }
+    handleMemes(message, sendReply);
 
     if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
