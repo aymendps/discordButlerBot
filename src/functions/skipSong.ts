@@ -54,7 +54,10 @@ export const executeSkipSong = async (
         new EmbedBuilder()
           .setTitle("Skipping " + song.title)
           .setURL(song.url)
-          .setDescription("This song was skipped by " + member.nickname)
+          .setDescription(
+            "This song was skipped by " +
+              (member.nickname || member.user.username)
+          )
           .setThumbnail(song.thumbnail_url)
           .setColor("DarkBlue"),
       ],

@@ -31,6 +31,7 @@ export const playSong = async (
   successReply: (song: Song, remaining: number) => void,
   errorReply: () => void,
   finishReply: () => void,
+  ageRestrictionReply: (song: Song) => Promise<void>,
   allowReply = true
 ) => {
   try {
@@ -42,42 +43,6 @@ export const playSong = async (
       return;
     }
 
-    const seek = Number(currentSong.seek || 0);
-
-    let toPlay = currentSong.url;
-
-    if (currentSong.url.includes("spotify")) {
-      const searchForAlternative = await play.search(currentSong.title, {
-        limit: 1,
-      });
-      toPlay = searchForAlternative[0].url;
-      console.log("using alternative url: " + toPlay);
-    }
-
-    const ffmpegStream = new PassThrough();
-
-    if (!currentSong.isFile) {
-      const stream = await play.stream(toPlay, { seek: seek });
-
-      ffmpeg()
-        .input(stream.stream)
-        .noVideo()
-        .audioCodec("libopus")
-        .format("opus")
-        .audioChannels(2)
-        .setStartTime(Number(seek))
-        .setDuration(Number(currentSong.duration) - Number(seek))
-        .pipe(ffmpegStream);
-    } else {
-      ffmpeg(toPlay)
-        .noVideo()
-        .format("mp3")
-        .audioChannels(2)
-        .pipe(ffmpegStream);
-    }
-
-    const audioResource = createAudioResource(ffmpegStream);
-
     audioPlayer.on("stateChange", (oldState, newState) => {
       if (newState.status === AudioPlayerStatus.Idle) {
         playSong(
@@ -87,7 +52,8 @@ export const playSong = async (
           songQueue.pop(),
           successReply,
           errorReply,
-          finishReply
+          finishReply,
+          ageRestrictionReply
         );
       }
     });
@@ -109,6 +75,7 @@ export const playSong = async (
           successReply,
           errorReply,
           finishReply,
+          ageRestrictionReply,
           false
         );
       } else {
@@ -117,10 +84,70 @@ export const playSong = async (
       }
     });
 
+    const seek = Number(currentSong.seek || 0);
+
+    let toPlay = currentSong.url;
+
+    if (currentSong.url.includes("spotify")) {
+      const searchForAlternative = await play.search(currentSong.title, {
+        limit: 1,
+      });
+      toPlay = searchForAlternative[0].url;
+      console.log("using alternative url: " + toPlay);
+    }
+
+    const ffmpegStream = new PassThrough();
+
+    if (!currentSong.isFile) {
+      const stream = await play.stream(toPlay, { seek: seek });
+      ffmpeg()
+        .input(stream.stream)
+        .noVideo()
+        .audioCodec("libopus")
+        .format("opus")
+        .audioChannels(2)
+        .setStartTime(Number(seek))
+        .setDuration(Number(currentSong.duration) - Number(seek))
+        .pipe(ffmpegStream);
+    } else {
+      ffmpeg(toPlay)
+        .noVideo()
+        .format("mp3")
+        .audioChannels(2)
+        .pipe(ffmpegStream);
+    }
+
+    const audioResource = createAudioResource(ffmpegStream);
     audioPlayer.play(audioResource);
     if (allowReply) successReply(currentSong, songQueue.length());
   } catch (error) {
-    console.log(error);
+    if (error.message.includes("Sign in to confirm your age")) {
+      await ageRestrictionReply(currentSong);
+      playSong(
+        connection,
+        audioPlayer,
+        songQueue,
+        songQueue.pop(),
+        successReply,
+        errorReply,
+        finishReply,
+        ageRestrictionReply
+      );
+    } else if (error.code === "ERR_SSL_WRONG_VERSION_NUMBER") {
+      console.log("Handling SSL Error");
+      playSong(
+        connection,
+        audioPlayer,
+        songQueue,
+        currentSong,
+        successReply,
+        errorReply,
+        finishReply,
+        ageRestrictionReply
+      );
+    } else {
+      console.log(error);
+    }
   }
 };
 
@@ -283,7 +310,14 @@ export const executePlaySong = async (
                 collector.stop();
                 return;
               }
-              await confirmation.update({
+              await executeSkipSong(
+                client,
+                confirmation.member as GuildMember,
+                songQueue,
+                audioPlayer,
+                sendReplyFunction
+              );
+              confirmation.update({
                 embeds: [
                   new EmbedBuilder()
                     .setTitle("Playing " + song.title)
@@ -310,13 +344,6 @@ export const executePlaySong = async (
                   ),
                 ],
               });
-              await executeSkipSong(
-                client,
-                member,
-                songQueue,
-                audioPlayer,
-                sendReplyFunction
-              );
             } else if (confirmation.customId === "add-fave") {
               confirmation.update({
                 embeds: [
@@ -559,11 +586,22 @@ export const executePlaySong = async (
                 .setColor("DarkGreen"),
             ],
           });
+        },
+        async (song) => {
+          await sendReplyFunction({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("Oh no! Age Restricted Song!")
+                .setDescription(
+                  `The song ${song.title} is age restricted. Skipping to the next song...`
+                )
+                .setColor("DarkGold"),
+            ],
+          });
         }
       );
     }
   } catch (error) {
-    console.log(error);
     if (error.message?.includes("Seeking beyond limit")) {
       sendReplyFunction({
         embeds: [

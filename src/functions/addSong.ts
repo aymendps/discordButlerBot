@@ -90,7 +90,12 @@ export const addSong = async (
         if (songInfo.type === "track") {
           const track = songInfo as SpotifyTrack;
           const song: Song = {
-            title: track.artists[0].name + " | " + track.name,
+            title:
+              track.artists[0].name +
+              " | " +
+              track.album.name +
+              " | " +
+              track.name,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
@@ -99,7 +104,13 @@ export const addSong = async (
 
           songQueue.push(song);
           return {
-            title: `Track - ${track.artists[0].name + " | " + track.name}`,
+            title: `Track - ${
+              track.artists[0].name +
+              " | " +
+              track.album.name +
+              " | " +
+              track.name
+            }`,
             url: track.url,
             thumbnail_url: track.thumbnail.url,
             duration: track.durationInSec,
@@ -111,7 +122,7 @@ export const addSong = async (
 
           const songs: Song[] = albumTracks.map((t) => {
             return {
-              title: t.artists[0].name + " | " + t.name,
+              title: t.artists[0].name + " | " + t.album.name + " | " + t.name,
               url: t.url,
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
@@ -137,7 +148,7 @@ export const addSong = async (
 
           const songs: Song[] = playlistTracks.map((t) => {
             return {
-              title: t.artists[0].name + " | " + t.name,
+              title: t.artists[0].name + " | " + t.album.name + " | " + t.name,
               url: t.url,
               thumbnail_url: t.thumbnail
                 ? t.thumbnail.url
@@ -160,7 +171,6 @@ export const addSong = async (
         }
       } else {
         const songInfo = await play.search(url, { limit: 1 });
-
         const song: Song = {
           title: songInfo[0].title,
           url: songInfo[0].url,

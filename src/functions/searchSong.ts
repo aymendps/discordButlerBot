@@ -89,14 +89,22 @@ export const executeSearchSong = async (
           .setCustomId(`queue-song-with-index-${index}`)
       );
 
-      const buttonsActionRow =
-        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-          buttons
+      let buttonsActionRow = new Array<
+        ActionRowBuilder<MessageActionRowComponentBuilder>
+      >();
+
+      // Split the buttons into groups of 5
+      for (let i = 0; i < buttons.length; i += 5) {
+        buttonsActionRow.push(
+          new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+            buttons.slice(i, i + 5)
+          )
         );
+      }
 
       const response = await sendReplyFunction({
         embeds: resultsEmbed,
-        components: [buttonsActionRow],
+        components: buttonsActionRow,
       });
 
       const collector = response.createMessageComponentCollector({

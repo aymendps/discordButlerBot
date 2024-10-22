@@ -30,7 +30,7 @@ import { executePlaySongFromFile } from "../functions/playSongFromFile";
 
 const handleMemes = (message: Message, sendReply: Function) => {
   if (
-    message.content.includes("good bot") &&
+    message.content.toLowerCase().includes("good bot") &&
     !message.content.startsWith(PREFIX)
   ) {
     sendReply({ content: ":heart:" });
@@ -43,6 +43,20 @@ const handleMemes = (message: Message, sendReply: Function) => {
   ) {
     sendReply({ content: "boubou" });
     return;
+  }
+
+  if (message.embeds[0] && message.embeds[0].title) {
+    if (
+      message.embeds[0].title.toLowerCase().includes("playing") &&
+      (message.embeds[0].title.toLowerCase().includes("day of night") ||
+        message.embeds[0].title.toLowerCase().includes("silent hill")) &&
+      !message.content.startsWith(PREFIX)
+    ) {
+      sendReply({
+        content:
+          "https://tenor.com/view/sad-emoji-sad-emoji-emoji-stare-disgust-gif-405076546600269050",
+      });
+    }
   }
 };
 
